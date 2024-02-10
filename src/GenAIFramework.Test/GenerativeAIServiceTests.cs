@@ -1,17 +1,14 @@
-﻿using Automation.GenerativeAI;
-using Automation.GenerativeAI.Interfaces;
+﻿using Automation.GenerativeAI.Interfaces;
 using Automation.GenerativeAI.LLM;
 using Automation.GenerativeAI.Stores;
 using Automation.GenerativeAI.Tools;
 using Automation.GenerativeAI.Utilities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Remoting.Contexts;
 using System.Threading.Tasks;
 using GenerativeApp = Automation.GenerativeAI.Application;
 

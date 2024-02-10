@@ -9,6 +9,7 @@ using Automation.GenerativeAI.Utilities;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using System.Threading;
+using System.Runtime.Serialization;
 
 namespace Automation.GenerativeAI.Stores
 {
@@ -107,57 +108,64 @@ namespace Automation.GenerativeAI.Stores
             var store = new VectorStore();
             using (var stream = new FileStream(recepiefile, FileMode.Open))
             {
-                var formatter = new BinaryFormatter();
-                var header = formatter.Deserialize(stream).To<string>();
-                if (string.Compare(header, store.v1header) != 0)
+                using(var headerreader = new BinaryReader(stream))
                 {
-                    var error = "Invalid Vector Store model file format, header info is missing";
-                    Logger.WriteLog(LogLevel.Error, LogOps.Result, error);
-                    throw new FormatException(error);
-                }
-
-                using (var gzip = new GZipStream(stream, CompressionMode.Decompress, true))
-                {
-                    int nVectors = (int)formatter.Deserialize(gzip);
-                    int nVectorLength = 0;
-                    for (int i = 0; i < nVectors; ++i)
+                    var header = headerreader.ReadString();
+                    if (string.Compare(header, store.v1header) != 0)
                     {
-                        nVectorLength = (int)formatter.Deserialize(gzip);
-                        var vector = new double[nVectorLength];
-                        for (int j = 0; j < nVectorLength; ++j)
-                        {
-                            vector[j] = (double)formatter.Deserialize(gzip);
-                        }
-                        store.vectors.Add(vector);
-                    }
-                    int nAttributes = (int)formatter.Deserialize(gzip);
-                    for (int k = 0; k < nAttributes; k++)
-                    {
-                        int n = (int)formatter.Deserialize(gzip);
-                        var attribute = new Dictionary<string, string>();
-                        for(int j = 0; j < n; ++j)
-                        {
-                            string key = (string)formatter.Deserialize(gzip);
-                            string value = (string)formatter.Deserialize(gzip);
-                            attribute.Add(key, value);
-                        }
-                        store.attributes.Add(attribute);
+                        var error = "Invalid Vector Store model file format, header info is missing";
+                        Logger.WriteLog(LogLevel.Error, LogOps.Result, error);
+                        throw new FormatException(error);
                     }
 
-                    try
+                    using (var gzip = new GZipStream(stream, CompressionMode.Decompress, true))
                     {
-                        store.transformer = (IVectorTransformer)formatter.Deserialize(gzip);
-                    }
-                    catch (Exception ex)
-                    {
-                        if (nVectorLength == 1536)
+                        using(var reader = new BinaryReader(gzip))
                         {
-                            Logger.WriteLog(LogLevel.Warning, LogOps.Exception, $"Couldn't deserialize vector transformer, creating a default transformer. Exception: {ex.Message}");
-                            store.transformer = new OpenAIEmbeddingTransformer();
-                        }
-                        else
-                        {
-                            throw ex;
+                            int nVectors = reader.ReadInt32();
+                            int nVectorLength = 0;
+                            for (int i = 0; i < nVectors; ++i)
+                            {
+                                nVectorLength = reader.ReadInt32();
+                                var vector = new double[nVectorLength];
+                                for (int j = 0; j < nVectorLength; ++j)
+                                {
+                                    vector[j] = reader.ReadDouble();
+                                }
+                                store.vectors.Add(vector);
+                            }
+                            int nAttributes = reader.ReadInt32();
+                            for (int k = 0; k < nAttributes; k++)
+                            {
+                                int n = reader.ReadInt32();
+                                var attribute = new Dictionary<string, string>();
+                                for (int j = 0; j < n; ++j)
+                                {
+                                    string key = reader.ReadString();
+                                    string value = reader.ReadString();
+                                    attribute.Add(key, value);
+                                }
+                                store.attributes.Add(attribute);
+                            }
+
+                            try
+                            {
+                                var classname = reader.ReadString();
+                                var type = Type.GetType(classname);
+                                store.transformer = (IVectorTransformer)Activator.CreateInstance(type);
+                            }
+                            catch (Exception ex)
+                            {
+                                if (nVectorLength == 1536)
+                                {
+                                    Logger.WriteLog(LogLevel.Warning, LogOps.Exception, $"Couldn't deserialize vector transformer, creating a default transformer. Exception: {ex.Message}");
+                                    store.transformer = new OpenAIEmbeddingTransformer();
+                                }
+                                else
+                                {
+                                    throw;
+                                }
+                            }
                         }
                     }
                 }
@@ -170,38 +178,44 @@ namespace Automation.GenerativeAI.Stores
         {
             using (var stream = new FileStream(filepath, FileMode.Create))
             {
-                var formatter = new BinaryFormatter();
-                //Write the header info
-                formatter.Serialize(stream, v1header);
-
-                using (var gzip = new GZipStream(stream, CompressionMode.Compress, true))
+                using(var headerwriter = new BinaryWriter(stream))
                 {
-                    //Serialize Vectors
-                    formatter.Serialize(gzip, this.vectors.Count);
-                    foreach (var item in vectors)
+                    //Write the header info
+                    headerwriter.Write(v1header);
+
+                    using (var gzip = new GZipStream(stream, CompressionMode.Compress, true))
                     {
-                        formatter.Serialize(gzip, item.Length);
-                        for(int i = 0; i < item.Length; i++)
+                        using (var writer = new BinaryWriter(gzip))
                         {
-                            formatter.Serialize(gzip, item[i]);
+                            //Serialize Vectors
+                            writer.Write(this.vectors.Count);
+                            foreach (var item in vectors)
+                            {
+                                writer.Write(item.Length);
+                                for (int i = 0; i < item.Length; i++)
+                                {
+                                    writer.Write(item[i]);
+                                }
+                            }
+
+                            //Serialize attributes
+                            writer.Write(attributes.Count);
+                            foreach (var att in attributes)
+                            {
+                                writer.Write(att.Count);
+                                foreach (var a in att)
+                                {
+                                    writer.Write(a.Key);
+                                    writer.Write(a.Value);
+                                }
+                            }
+
+                            //Serialize vector transformer class so that it can be instatiated.
+                            //TODO: what if the transformer can't be instantiated with class name.
+                            var transformerclass = transformer.GetType().FullName;
+                            writer.Write(transformerclass);
                         }
                     }
-
-                    //Serialize attributes
-                    formatter.Serialize(gzip, attributes.Count);
-                    foreach (var att in attributes)
-                    {
-                        formatter.Serialize(gzip, att.Count);
-                        foreach (var a in att)
-                        {
-                            formatter.Serialize(gzip, a.Key);
-                            formatter.Serialize(gzip, a.Value);
-                        }
-                    }
-
-                    //Serialize vector transformer
-                    //TODO: what if the transformer is not serializable
-                    formatter.Serialize(gzip, transformer);
                 }
             }
         }

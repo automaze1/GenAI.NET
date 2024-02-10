@@ -4,11 +4,8 @@ using Automation.GenerativeAI.Tools;
 using Automation.GenerativeAI.Utilities;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net;
-using System.Text;
-using System.Web.Script.Serialization;
 
 namespace Automation.GenerativeAI.Stores
 {
@@ -87,7 +84,7 @@ namespace Automation.GenerativeAI.Stores
         public double[] Transform(string textObject)
         {
             var data = new EmbeddingRequest() { input = textObject };
-            var serializer = new JavaScriptSerializer();
+            var serializer = new JsonSerializer();
 
             string jsonPayload = serializer.Serialize(data);
             try

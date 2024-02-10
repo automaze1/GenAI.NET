@@ -51,6 +51,7 @@ namespace Automation.GenerativeAI.Tools
         /// Get the outlook instance or start a new one
         /// </summary>
         /// <returns></returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "<Pending>")]
         private static Application GetApplicationObject()
         {
             Application application = null;
@@ -59,7 +60,7 @@ namespace Automation.GenerativeAI.Tools
             if (Process.GetProcessesByName("OUTLOOK").Length > 0)
             {
                 // If so, use the GetActiveObject method to obtain the process and cast it to an Application object.
-                application = Marshal.GetActiveObject("Outlook.Application") as Application;
+                application = (Application)Marshal.BindToMoniker("Outlook.Application");
             }
             else
             {
@@ -81,6 +82,7 @@ namespace Automation.GenerativeAI.Tools
         /// <param name="outlook"></param>
         /// <param name="outlookNamespace"></param>
         /// <param name="sendAll"></param>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "<Pending>")]
         private static void ReleaseApplicationObject(Application outlook, NameSpace outlookNamespace, bool sendAll = false)
         {
             if (null != outlookNamespace)
@@ -165,6 +167,7 @@ namespace Automation.GenerativeAI.Tools
         /// </summary>
         /// <param name="sender">Sender whose email needs to be read. If empty, then email from all senders will be read.</param>
         /// <param name="subjectFilter">Email with specfic subject to be read. If empty, all emails will be read.</param>
+        /// <param name="mailboxFolder">Mailbox folder path.</param>
         /// <param name="fromDate">A date filter for email indicating all emails from this date to be read. Date needs to be in dd/MM/yyyy format.</param>
         /// <param name="toDate">A date filter for email indicating all emails up to this date to be read. Date needs to be in dd/MM/yyyy format.</param>
         /// <param name="count">Maximum number of eamils to be returned.</param>

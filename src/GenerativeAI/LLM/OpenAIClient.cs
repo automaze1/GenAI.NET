@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web.Script.Serialization;
 
 namespace Automation.GenerativeAI.LLM
 {
@@ -57,7 +56,7 @@ namespace Automation.GenerativeAI.LLM
                 case "stop":
                     return new LLMResponse() { Type = ResponseType.Done, Response = msg.content };
                 case "function_call":
-                    var serializer = new JavaScriptSerializer();
+                    var serializer = new JsonSerializer();
                     string json = serializer.Serialize(msg.function_call);
                     return new LLMResponse() { Type = ResponseType.FunctionCall, Response = json };
                 default:
@@ -93,7 +92,7 @@ namespace Automation.GenerativeAI.LLM
         {
             var funcs = ToFunctions(functions);
 
-            var serializer = new JavaScriptSerializer();
+            var serializer = new JsonSerializer();
 
             string json = serializer.Serialize(funcs);
             return json;
@@ -103,31 +102,32 @@ namespace Automation.GenerativeAI.LLM
         {
             try
             {
-                ChatRequest data = null;
+                var serializer = new JsonSerializer();
+                string jsonPayload = string.Empty;
                 if (functions == null || !functions.Any())
                 {
-                    data = new ChatRequest()
+                    var data = new ChatRequest()
                     {
                         model = config.Model,
                         messages = messages.ToArray(),
                         temperature = temperature
                     };
+                    jsonPayload = serializer.Serialize(data);
                 }
                 else
                 {
                     var funcs = ToFunctions(functions);
-                    data = new FunctionRequest()
+                    var req = new FunctionRequest()
                     {
                         model = config.Model,
                         messages = messages.ToArray(),
                         temperature = temperature,
                         functions = funcs
                     };
+                    jsonPayload = serializer.Serialize(req);
                 }
 
-                var serializer = new JavaScriptSerializer();
-
-                string jsonPayload = serializer.Serialize(data);
+                
                 Logger.WriteLog(LogLevel.Info, LogOps.Request, jsonPayload);
 
                 string json = await httpTool.PostAsync(config.CompletionsUrl, jsonPayload);

@@ -4,9 +4,8 @@ using Automation.GenerativeAI.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
+using System.Text.Json;
 using System.Threading.Tasks;
-using System.Web.Script.Serialization;
 
 namespace Automation.GenerativeAI.Chat
 {
@@ -90,7 +89,7 @@ QUESTION:
                 case ResponseType.Partial:
                     return new ChatMessage(Role.assistant, response.Response);
                 case ResponseType.FunctionCall:
-                    var serializer = new JavaScriptSerializer();
+                    var serializer = new Utilities.JsonSerializer();
                     var function_call = serializer.Deserialize<Dictionary<string, object>>(response.Response);
                     return new FunctionCallMessage() { function_call = function_call };
                 default:
@@ -168,12 +167,19 @@ QUESTION:
                     var fmsg = msg as FunctionCallMessage;
                     object function = null;
                     fmsg.function_call.TryGetValue("name", out function);
-                    string args = (string)fmsg.function_call["arguments"];
+                    string args = fmsg.function_call["arguments"].ToString();
 
-                    var serializer = new JavaScriptSerializer();
+                    var serializer = new Utilities.JsonSerializer();
                     var arguments = serializer.Deserialize<Dictionary<string, object>>(args);
+                    foreach ( var kv in arguments )
+                    {
+                        if(kv.Value is JsonElement element)
+                        {
+                            arguments[kv.Key] = Utilities.JsonSerializer.GetObject(element);
+                        }
+                    }
                     var context = new ExecutionContext(arguments);
-                    var output = await tool.ExecuteAsync((string)function, context);
+                    var output = await tool.ExecuteAsync(function.ToString(), context);
 
                     if (string.IsNullOrEmpty(output))
                     {
@@ -181,7 +187,7 @@ QUESTION:
                         return fmsg;
                     }
 
-                    msgs.Add(new FunctionMessage((string)function, output));
+                    msgs.Add(new FunctionMessage(function.ToString(), output));
                 }
             }
             if (response.Type == ResponseType.Done)

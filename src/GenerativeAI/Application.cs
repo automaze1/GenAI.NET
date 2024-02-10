@@ -10,7 +10,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Security.AccessControl;
 using System.Threading.Tasks;
 using ExecutionContext = Automation.GenerativeAI.Interfaces.ExecutionContext;
 
@@ -207,10 +206,28 @@ namespace Automation.GenerativeAI
             return GetResponseAsync(message, temperature).GetAwaiter().GetResult();
         }
 
+        /// <summary>
+        /// Utility method to serialize a given object to JSON string
+        /// </summary>
+        /// <param name="obj">Object to serialize</param>
+        /// <returns>JSON string</returns>
+        public static string ToJsonString(object obj)
+        {
+            if (obj == null) return string.Empty;
+            if (obj is string || obj.GetType().IsValueType) return obj.ToString();
+
+            var serializer = new JsonSerializer();
+            var json = serializer.Serialize(obj);
+            return json;
+        }
+
         internal static IEnumerable<string> GetFiles(string source, string[] extensions)
         {
             IEnumerable<string> files = Enumerable.Empty<string>();
             var directory = string.Empty;
+            
+            if(source.IndexOfAny(Path.GetInvalidPathChars()) >= 0) return Enumerable.Empty<string>();
+            
             if (source.Contains("*"))
             {
                 var searchpattern = Path.GetFileName(source);

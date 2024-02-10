@@ -1,17 +1,14 @@
 ﻿using Automation.GenerativeAI.Interfaces;
 using Automation.GenerativeAI.Tools;
 using Automation.GenerativeAI.Utilities;
-using PdfSharp.Drawing.BarCodes;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Web.Script.Serialization;
 using System.Xml;
 
 namespace Automation.GenerativeAI

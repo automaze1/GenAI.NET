@@ -1,9 +1,9 @@
 ﻿using Automation.GenerativeAI.Interfaces;
 using Automation.GenerativeAI.Tools;
+using Automation.GenerativeAI.Utilities;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Web.Script.Serialization;
 
 namespace Automation.GenerativeAI.Agents
 {
@@ -129,7 +129,7 @@ namespace Automation.GenerativeAI.Agents
                 case ResponseType.Partial:
                     return new ChatMessage(Role.assistant, response.Response);
                 case ResponseType.FunctionCall:
-                    var serializer = new JavaScriptSerializer();
+                    var serializer = new JsonSerializer();
                     var function_call = serializer.Deserialize<Dictionary<string, object>>(response.Response);
                     return new FunctionCallMessage() { function_call = function_call };
                 default:

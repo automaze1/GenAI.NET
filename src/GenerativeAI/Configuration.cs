@@ -1,7 +1,7 @@
-﻿using System;
+﻿using Automation.GenerativeAI.Utilities;
+using System;
 using System.IO;
 using System.Reflection;
-using System.Web.Script.Serialization;
 
 namespace Automation.GenerativeAI
 {
@@ -214,7 +214,7 @@ namespace Automation.GenerativeAI
         public void Save(string filePath)
         {
             var jsonfile = Path.ChangeExtension(filePath, "json");
-            JavaScriptSerializer serializer = new JavaScriptSerializer();
+            JsonSerializer serializer = new JsonSerializer();
             var jsontxt = serializer.Serialize(this);
             File.WriteAllText(jsonfile, jsontxt);
         }
@@ -228,7 +228,7 @@ namespace Automation.GenerativeAI
         {
             if(!File.Exists(filePath)) return new Configuration();
             
-            JavaScriptSerializer serializer = new JavaScriptSerializer();
+            JsonSerializer serializer = new JsonSerializer();
             var jsontxt = File.ReadAllText(filePath);
             return serializer.Deserialize<Configuration>(jsontxt);
         }

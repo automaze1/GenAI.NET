@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Web.Script.Serialization;
 
 namespace Automation.GenerativeAI.LLM
 {
@@ -97,7 +96,7 @@ namespace Automation.GenerativeAI.LLM
         public LLMResponse GetResponse(IEnumerable<ChatMessage> messages, IEnumerable<FunctionDescriptor> functions, double temperature)
         {
             var data = new ChatRequest() { model = model, messages = messages.ToArray(), temperature = temperature };
-            var serializer = new JavaScriptSerializer();
+            var serializer = new JsonSerializer();
             string jsonPayload = serializer.Serialize(data);
             Logger.WriteLog(LogLevel.Info, LogOps.Request, jsonPayload);
 
@@ -109,7 +108,7 @@ namespace Automation.GenerativeAI.LLM
             var responsetype = ResponseType.Done;
             if (functions != null && FunctionTool.IsJsonString(response))
             {
-                var responseobj = serializer.DeserializeObject(response);
+                var responseobj = serializer.Deserialize<object>(response);
                 if (IsDictionary(responseobj))
                 {
                     var dict = responseobj as IDictionary<string, object>;

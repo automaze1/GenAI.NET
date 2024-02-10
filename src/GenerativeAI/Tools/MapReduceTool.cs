@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Automation.GenerativeAI.Tools
@@ -63,6 +64,11 @@ namespace Automation.GenerativeAI.Tools
                 object value = null;
                 if (!context.TryGetValue(parameter, out value)) continue;
 
+                if(value is JsonElement element)
+                {
+                    value = element.Deserialize<object[]>();
+
+                }
                 if (!(value is IEnumerable)) throw new ArgumentException($"Expected an Array of objects for parameter: {parameter}!");
 
                 var values = (value as IEnumerable).Cast<object>().ToList();

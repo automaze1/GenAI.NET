@@ -1,0 +1,139 @@
+<Project>
+  <PropertyGroup>
+    <Platforms>AnyCPU;</Platforms>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <PlatformTarget >x64</PlatformTarget>
+    <!--Use the property DotNet to set TargetFramework from commandline without forcing it on all projects-->
+    <!--Ex. DynamoServices uses TargetFramework netstandard2.0 -->
+    <DotNet>net8.0</DotNet>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">16.0</VisualStudioVersion>
+    <TargetFramework>$(DotNet)</TargetFramework>
+    <FileAlignment>512</FileAlignment>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath> 
+    <OutputPath Condition=" '$(OutputPath)' == '' ">$(SolutionDir)..\bin\$(Platform)\$(Configuration)</OutputPath>
+    <NunitPath Condition=" '$(NunitPath)' == '' ">$(SolutionDir)..\extern\NUnit</NunitPath>
+    <SharpDXDirectXVersion>DirectX11</SharpDXDirectXVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+    <UICulture>en-US</UICulture>
+    <OutputType Condition=" '$(OutputType)' == '' ">Library</OutputType>
+    <NoWarn>MSB3539;CS1591;CS0618;CS0612;CS0672</NoWarn>
+    <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
+    <DebugSymbols>true</DebugSymbols>
+    <SelfContained>false</SelfContained>
+  </PropertyGroup>
+  <PropertyGroup>
+    <Product>Generative AI Library</Product>
+    <Company>Automation Agent</Company>
+    <Copyright>Copyright © Automation Agent 2023-2024</Copyright>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <VersionMajor>1</VersionMajor>
+    <VersionMinor>2</VersionMinor>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <VersionPrefix>$(VersionMajor).$(VersionMinor)</VersionPrefix>
+    <VersionSuffix>preview</VersionSuffix>
+  </PropertyGroup>
+  <PropertyGroup>
+    <GenerateReleaseNotes Condition="'$(GenerateReleaseNotes)' == ''">false</GenerateReleaseNotes>
+    <GenerateAssemblyBuildDateAttribute Condition="'$(GenerateAssemblyBuildDateAttribute)' == ''">true</GenerateAssemblyBuildDateAttribute>
+  </PropertyGroup>
+    <PropertyGroup>
+    <DebugType>full</DebugType>
+    </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug' ">
+    <Optimize>false</Optimize>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+  </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <Optimize>true</Optimize>
+    <DefineConstants>TRACE</DefineConstants>
+  </PropertyGroup>
+    <PropertyGroup>
+    <!--Needed to copy nuget package assemblies to output folder. Anet6 issue-->
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <GenerateDependencyFile>false</GenerateDependencyFile>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(Platform.Contains('AnyCPU'))" >
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <DefineConstants>$(DefineConstants);_WINDOWS</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(UILib)' == 'true' AND $(RuntimeIdentifier.Contains('win'))">
+    <TargetFramework>$(TargetFramework)-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+  </PropertyGroup>
+  <PropertyGroup>
+    <BaseIntermediateOutputPath>int\$(TargetFramework)\</BaseIntermediateOutputPath>
+    <IntermediateOutputPath>obj\$(TargetFramework)\</IntermediateOutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="obj\**" />
+    <EmbeddedResource Remove="obj\**" />
+    <None Remove="obj\**" />
+    <None Remove="*.resources" />
+    <Compile Remove="int\**" />
+    <EmbeddedResource Remove="int\**" />
+    <None Remove="int\**" />
+    <InternalsVisibleTo Include="GenAIFramework.Test"/>
+  </ItemGroup>
+  <ItemDefinitionGroup>
+    <ProjectReference>
+      <Private>false</Private>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <Target Name="CleanIntermediaryFolder" Condition="Exists('$(ProjectDir)$(BaseIntermediateOutputPath)')" BeforeTargets="Clean" >
+     <RemoveDir ContinueOnError="WarnAndContinue" Directories="$(ProjectDir)$(BaseIntermediateOutputPath)" /> <!-- int -->
+  </Target>
+  <Target Name="CopyPackageData" AfterTargets="Build" Outputs="%(PackageReference.Identity)" >
+    <PropertyGroup>
+      <Local_CopyMetaData>%(PackageReference.CopyMetaData)</Local_CopyMetaData>
+      <Local_CopyXML>%(PackageReference.CopyXML)</Local_CopyXML>
+      <Local_CopyPDB>%(PackageReference.CopyPDB)</Local_CopyPDB>
+      <Local_NuGetPackageId>%(PackageReference.Identity)</Local_NuGetPackageId>
+      <Local_CopyToSubdirectory>%(PackageReference.CopyDllToSubdirectory)</Local_CopyToSubdirectory>
+      <PackagesOutputSubdirectory>%(ReferenceCopyLocalPaths.DestinationSubDirectory)</PackagesOutputSubdirectory>
+    </PropertyGroup>
+    <ItemGroup Condition="$(Local_CopyXML) == 'true' or $(Local_CopyMetaData) == 'true'">
+      <MyReferences Include="@(ReferencePath->WithMetadataValue( 'NuGetPackageId', $(Local_NuGetPackageId) ))" />
+      <XMLContent Include="%(MyReferences.RelativeDir)%(MyReferences.FileName).xml" Condition="$([System.String]::Copy('%(MyReferences.FullPath)').ToLower().Contains('$(Local_NuGetPackageId.ToLower())'))" />
+    </ItemGroup>
+    <ItemGroup Condition="$(Local_CopyPDB) == 'true' or $(Local_CopyMetaData) == 'true'">
+      <MyReferences Include="@(ReferencePath->WithMetadataValue( 'NuGetPackageId', $(Local_NuGetPackageId) ))" />
+      <PDBContent Include="%(MyReferences.RelativeDir)%(MyReferences.FileName).pdb" Condition="$([System.String]::Copy('%(MyReferences.FullPath)').ToLower().Contains('$(Local_NuGetPackageId.ToLower())'))" />
+    </ItemGroup>
+    <ItemGroup Condition="$(Local_CopyToSubdirectory) != ''">
+      <MyReferences Include="@(ReferencePath->WithMetadataValue( 'NuGetPackageId', $(Local_NuGetPackageId) ))" />
+      <DLLContent Include="%(MyReferences.FullPath)" Condition="$([System.String]::Copy('%(MyReferences.FullPath)').ToLower().Contains('$(Local_NuGetPackageId.ToLower())'))" />
+    </ItemGroup>
+    <Copy SourceFiles="@(XMLContent)" DestinationFolder="$(OutDir)$(PackagesOutputSubdirectory)" Condition="Exists('%(FullPath)')" />
+    <Copy SourceFiles="@(PDBContent)" DestinationFolder="$(OutDir)$(PackagesOutputSubdirectory)" Condition="Exists('%(FullPath)')" />
+    <Copy SourceFiles="@(DLLContent)" DestinationFolder="$(OutDir)$(PackagesOutputSubdirectory)$(Local_CopyToSubdirectory)" Condition="Exists('%(FullPath)')" />
+  </Target>
+  <Target Name="ResolveSateliteResDeps" AfterTargets="Build" Condition=" '$(OS)' != 'Unix' ">
+   <PropertyGroup>
+        <OutputExtension>dll</OutputExtension>
+    </PropertyGroup>
+    <GetAssemblyIdentity AssemblyFiles="$(TargetPath)">
+      <Output TaskParameter="Assemblies" ItemName="AssemblyInfo" />
+    </GetAssemblyIdentity>
+  </Target>
+  <Choose>
+      <When Condition=" '$(OS)' != 'Unix' ">
+          <PropertyGroup>
+              <PowerShellCommand>powershell.exe</PowerShellCommand>
+          </PropertyGroup>
+      </When>
+      <Otherwise>
+          <PropertyGroup>
+              <PowerShellCommand>pwsh</PowerShellCommand>
+          </PropertyGroup>
+      </Otherwise>
+  </Choose>
+</Project>

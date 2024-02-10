@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Web.Script.Serialization;
 
 namespace Automation.GenerativeAI.Agents
 {
@@ -26,7 +25,6 @@ namespace Automation.GenerativeAI.Agents
         /// Generates user prompt with query and the scratchpad
         /// </summary>
         /// <param name="query"></param>
-        /// <param name="scratchpad"></param>
         /// <returns>ChatMessage</returns>
         ChatMessage GetUserPrompt(string query);
 
@@ -134,7 +132,7 @@ namespace Automation.GenerativeAI.Agents
 
                 try
                 {
-                    var serializer = new JavaScriptSerializer();
+                    var serializer = new JsonSerializer();
                     var step = serializer.Deserialize<StepAction>(json);
                     if(step == null)
                     {

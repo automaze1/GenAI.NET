@@ -144,7 +144,7 @@ namespace Automation.GenerativeAI.Tools
                 {
                     newContext[parameter.Name] = context[parameter.Name];
                 }
-                else
+                else if(parameter.Required)
                 {
                     newContext[parameter.Name] = previousResult;
                 }

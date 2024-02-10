@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Web.Script.Serialization;
 
 namespace Automation.GenerativeAI.Tools
 {
@@ -105,7 +104,7 @@ namespace Automation.GenerativeAI.Tools
             {
                 jsontxt = File.ReadAllText(json);
             }
-            JavaScriptSerializer serializer = new JavaScriptSerializer();
+            JsonSerializer serializer = new JsonSerializer();
             try
             {
                 var parameterDescriptors = serializer.Deserialize<List<ParameterDescriptor>>(jsontxt);
@@ -113,7 +112,7 @@ namespace Automation.GenerativeAI.Tools
             }
             catch (Exception ex)
             {
-                throw ex;
+                throw;
             }
             
             return this;
@@ -223,9 +222,9 @@ namespace Automation.GenerativeAI.Tools
         {
             if (response.Type != ResponseType.FunctionCall) return null;
 
-            var serializer = new JavaScriptSerializer();
-            var function_call = serializer.Deserialize<Dictionary<string, object>>(response.Response);
-            string args = (string)function_call["arguments"];
+            var serializer = new JsonSerializer();
+            var function_call = serializer.Deserialize<Dictionary<string, string>>(response.Response);
+            string args = function_call["arguments"];
 
             var arguments = serializer.Deserialize<Dictionary<string, object>>(args);
 

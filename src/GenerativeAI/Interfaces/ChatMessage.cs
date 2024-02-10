@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace Automation.GenerativeAI.Interfaces
 {
@@ -32,6 +33,8 @@ namespace Automation.GenerativeAI.Interfaces
     /// <summary>
     /// Represents a chat message
     /// </summary>
+    [JsonDerivedType(typeof(FunctionCallMessage))]
+    [JsonDerivedType(typeof(FunctionMessage))]
     public class ChatMessage
     {
         /// <summary>

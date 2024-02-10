@@ -5,7 +5,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Web.Script.Serialization;
 
 namespace Automation.GenerativeAI.Tools
 {
@@ -147,6 +146,16 @@ namespace Automation.GenerativeAI.Tools
             return output;
         }
 
+        /// <summary>
+        /// Executes this tool asynchronously.
+        /// </summary>
+        /// <param name="context">ExecutionContext</param>
+        /// <returns>Output string</returns>
+        public string Execute(ExecutionContext context)
+        {
+            return ExecuteAsync(context).GetAwaiter().GetResult();
+        }
+
         private static bool IsEnumerable(Type type)
         {
             return type.GetInterface(typeof(IEnumerable).FullName) != null;
@@ -228,8 +237,8 @@ namespace Automation.GenerativeAI.Tools
                 case "array":
                 case "object":
                     object obj = null;
-                    var serializer = new JavaScriptSerializer();
-                    obj = serializer.DeserializeObject(data);
+                    var serializer = new JsonSerializer();
+                    obj = serializer.Deserialize<object>(data);
                     return obj;
                 case "string":
                     return data;
@@ -250,7 +259,7 @@ namespace Automation.GenerativeAI.Tools
             if(obj == null) return string.Empty;
             if (obj is string || obj.GetType().IsValueType) return obj.ToString();
 
-            var serializer = new JavaScriptSerializer();
+            var serializer = new JsonSerializer();
             var json = serializer.Serialize(obj);
             return json;
         }
@@ -263,7 +272,7 @@ namespace Automation.GenerativeAI.Tools
         /// <returns>Deserialized object</returns>
         public static T Deserialize<T>(string json)
         {
-            var serializer = new JavaScriptSerializer();
+            var serializer = new JsonSerializer();
             return serializer.Deserialize<T>(json);
         }
 

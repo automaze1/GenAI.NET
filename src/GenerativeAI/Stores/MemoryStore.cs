@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Web.Script.Serialization;
 
 namespace Automation.GenerativeAI.Stores
 {
@@ -93,7 +92,7 @@ namespace Automation.GenerativeAI.Stores
         {
             try
             {
-                JavaScriptSerializer serializer = new JavaScriptSerializer();
+                JsonSerializer serializer = new JsonSerializer();
                 var data = serializer.Deserialize<Data>(File.ReadAllText(jsonFile));
                 var memory = new MemoryStore();
                 memory.maxCharacters = data.maxCharacters;
@@ -130,7 +129,7 @@ namespace Automation.GenerativeAI.Stores
         /// <exception cref="NotImplementedException"></exception>
         public void Save(string filepath)
         {
-            JavaScriptSerializer serializer = new JavaScriptSerializer();
+            JsonSerializer serializer = new JsonSerializer();
             string vdbpath = string.Empty;
 
             if(store != null)
