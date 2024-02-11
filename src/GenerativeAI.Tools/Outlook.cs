@@ -136,7 +136,7 @@ namespace Automation.GenerativeAI.Tools
         /// <param name="fromDate">A date filter for email indicating all emails from this date to be read. Date needs to be in dd/MM/yyyy format.</param>
         /// <param name="toDate">A date filter for email indicating all emails up to this date to be read. Date needs to be in dd/MM/yyyy format.</param>
         /// <param name="limit">Maximum number of emails to be returned.</param>
-        /// <param name="downloadFolder">Full path of a folder where attachments to be downloaded. If it is empty
+        /// <param name="downloadFolder">Full path of a folder where attachments to be downloaded. </param>
         /// <returns>Download status</returns>
         public static string DownloadEmailAttachments(string mailboxFolder, string sender, string subjectFilter, string fromDate, string toDate, int limit, string downloadFolder)
         {

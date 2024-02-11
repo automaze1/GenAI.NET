@@ -20,9 +20,6 @@
     <None Include="Utilities.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\..\src\GenerativeAI.Tools\GenerativeAI.Tools.csproj">
       <Project>{67f97e97-6da9-4f9e-905a-4b252a683322}</Project>
       <Name>GenerativeAI.Tools</Name>
