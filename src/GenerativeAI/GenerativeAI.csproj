@@ -43,6 +43,7 @@
     <Compile Include="Tools\HttpTool.cs" />
     <Compile Include="Tools\MapReduceTool.cs" />
     <Compile Include="Tools\Pipeline.cs" />
+    <Compile Include="Tools\ProcessExecutor.cs" />
     <Compile Include="Tools\PromptTool.cs" />
     <Compile Include="Tools\QueryTool.cs" />
     <Compile Include="Tools\SearchTool.cs" />
