@@ -895,6 +895,29 @@ namespace Automation.GenerativeAI
         }
 
         /// <summary>
+        /// Creates a process executor tool to execute a given process with appropriate arguments.
+        /// </summary>
+        /// <param name="name">Name of the tool</param>
+        /// <param name="description">Description of the tool</param>
+        /// <param name="exepath">Full path of the executable.</param>
+        /// <param name="workingdirectory">Working directory for the process, by default it uses 
+        /// user's temp folder as working directory.</param>
+        /// <returns>Status of the operation</returns>
+        public static string CreateProcessExecutorTool(string name, string description, string exepath, string workingdirectory = "")
+        {
+            var tool = toolsCollection.GetTool(name);
+            if (tool != null) return $"ERROR: A tool with name, '{name}' already exists!!";
+
+
+            tool = ProcessExecutor.Create(exepath, workingdirectory)
+                .WithName(name)
+                .WithDescription(description);
+
+            toolsCollection.AddTool(tool);
+            return "success";
+        }
+
+        /// <summary>
         /// Creates an automation agent which can perform a given objective with the help of tools available with it.
         /// </summary>
         /// <param name="name">Name of the agent</param>
