@@ -1,15 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO.Compression;
-using System.IO;
-using System.Linq;
-using System.Runtime.Serialization.Formatters.Binary;
-using Automation.GenerativeAI.Interfaces;
+﻿using Automation.GenerativeAI.Interfaces;
 using Automation.GenerativeAI.Utilities;
+using System;
 using System.Collections.Concurrent;
-using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
+using System.Linq;
 using System.Threading;
-using System.Runtime.Serialization;
+using System.Threading.Tasks;
 
 namespace Automation.GenerativeAI.Stores
 {
@@ -20,7 +18,7 @@ namespace Automation.GenerativeAI.Stores
     }
 
     [Serializable]
-    internal class VectorStore : IVectorStore
+    public class VectorStore : IVectorStore
     {
         private ConcurrentBag<double[]> vectors = new ConcurrentBag<double[]>();
         //private List<double[]> vectors = new List<double[]>();
@@ -100,7 +98,7 @@ namespace Automation.GenerativeAI.Stores
         public static VectorStore Create(string recepiefile)
         {
             var ext = Path.GetExtension(recepiefile);
-            if (ext.ToLower().Contains("vdb"))
+            if (ext.Contains("vdb", StringComparison.CurrentCultureIgnoreCase))
             {
                 recepiefile = Path.ChangeExtension(recepiefile, "vdb");
             }
@@ -108,7 +106,7 @@ namespace Automation.GenerativeAI.Stores
             var store = new VectorStore();
             using (var stream = new FileStream(recepiefile, FileMode.Open))
             {
-                using(var headerreader = new BinaryReader(stream))
+                using (var headerreader = new BinaryReader(stream))
                 {
                     var header = headerreader.ReadString();
                     if (string.Compare(header, store.v1header) != 0)

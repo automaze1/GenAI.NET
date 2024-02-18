@@ -113,7 +113,9 @@ namespace Automation.GenerativeAI.Tools
 
             // 4. Create new context with the mapped results for reduce operation
             var reducerContext = new ExecutionContext();
-            reducerContext[reducer.Descriptor.InputParameters.First()] = ctxts.Select(c => c[$"Result.{mapper.Name}"]);
+            var key = $"Result.{mapper.Name}";
+            object temp;
+            reducerContext[reducer.Descriptor.InputParameters.First()] = ctxts.Where(x => x.TryGetValue(key, out temp)).Select(c => c[key]);
 
             // 5. Execute the reduce operation asynchronously
             var result = new Result() { success = true };

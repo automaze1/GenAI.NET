@@ -276,7 +276,7 @@ namespace Automation.GenerativeAI.Agents
                     return new ChatMessage(Role.assistant, response.Response);
                 case ResponseType.FunctionCall:
                     var serializer = new JsonSerializer();
-                    var function_call = serializer.Deserialize<Dictionary<string, object>>(response.Response);
+                    Dictionary<string, object> function_call = serializer.Deserialize(response.Response);
                     return new FunctionCallMessage() { function_call = function_call };
                 default:
                     break;
@@ -318,11 +318,11 @@ namespace Automation.GenerativeAI.Agents
                 var fmsg = msg as FunctionCallMessage;
                 object function = null;
                 fmsg.function_call.TryGetValue("name", out function);
-                string args = (string)fmsg.function_call["arguments"];
+                string args = fmsg.function_call["arguments"].ToString();
 
                 var serializer = new JsonSerializer();
-                var arguments = serializer.Deserialize<Dictionary<string, object>>(args);
-                var tool = Tools.GetTool((string)function);
+                Dictionary<string, object> arguments = serializer.Deserialize(args);
+                var tool = Tools.GetTool(function.ToString());
                 return new AgentAction(tool, new ExecutionContext(arguments), $"Need to execute {tool.Name}");
             }
 
@@ -360,12 +360,12 @@ namespace Automation.GenerativeAI.Agents
                     var fmsg = msg as FunctionCallMessage;
                     object function = null;
                     fmsg.function_call.TryGetValue("name", out function);
-                    string args = (string)fmsg.function_call["arguments"];
+                    string args = fmsg.function_call["arguments"].ToString();
 
                     var serializer = new JsonSerializer();
                     var arguments = serializer.Deserialize<Dictionary<string, object>>(args);
                     var context = new ExecutionContext(arguments);
-                    var output = await Tools.ExecuteAsync((string)function, context);
+                    var output = await Tools.ExecuteAsync(function.ToString(), context);
 
                     if (string.IsNullOrEmpty(output))
                     {

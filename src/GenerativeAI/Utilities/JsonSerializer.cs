@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Collections.Generic;
+using System.Text.Json;
 using JSerializer = System.Text.Json.JsonSerializer;
 
 namespace Automation.GenerativeAI.Utilities
@@ -8,6 +9,28 @@ namespace Automation.GenerativeAI.Utilities
         public T Deserialize<T>(string json)
         {
             return JSerializer.Deserialize<T>(json);
+        }
+
+        public Dictionary<string, object> Deserialize(string json)
+        {
+            // Parse the json text to a JsonElement
+            JsonElement jsonElement = JSerializer.Deserialize<JsonElement>(json);
+
+            // Create an empty dictionary to store the key-value pairs
+            Dictionary<string, object> dictionary = new Dictionary<string, object>();
+
+            // Loop through the properties of the JsonElement
+            foreach (JsonProperty property in jsonElement.EnumerateObject())
+            {
+                // Get the property name and value
+                string key = property.Name;
+                object value = GetObject(property.Value);
+
+                // Add the key-value pair to the dictionary
+                dictionary.Add(key, value);
+            }
+
+            return dictionary;
         }
 
         public string Serialize<T>(T value)

@@ -57,6 +57,18 @@ namespace Automation.GenerativeAI.LLM
         {
             var config = new OpenAIConfig() { ApiKey = apikey, Model = model };
             openAIClient = new OpenAIClient(config);
+            Configuration.Instance.OpenAIConfig = config;
+        }
+
+        /// <summary>
+        /// Creates an instance of OpenAILanguageModel with a config file.
+        /// </summary>
+        /// <param name="configFilePath">Full path of a json file that has values for the following
+        /// keys: ApiKey, Model.</param>
+        public OpenAILanguageModel(string configFilePath)
+        {
+            var config = OpenAIConfig.Load(configFilePath);
+            openAIClient = new OpenAIClient(config);
         }
 
         public string ModelName => openAIClient.ModelName;

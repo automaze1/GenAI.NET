@@ -4,7 +4,6 @@ using Automation.GenerativeAI.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Automation.GenerativeAI.Chat
@@ -90,7 +89,7 @@ QUESTION:
                     return new ChatMessage(Role.assistant, response.Response);
                 case ResponseType.FunctionCall:
                     var serializer = new Utilities.JsonSerializer();
-                    var function_call = serializer.Deserialize<Dictionary<string, object>>(response.Response);
+                    Dictionary<string, object> function_call = serializer.Deserialize(response.Response);
                     return new FunctionCallMessage() { function_call = function_call };
                 default:
                     break;
@@ -170,14 +169,8 @@ QUESTION:
                     string args = fmsg.function_call["arguments"].ToString();
 
                     var serializer = new Utilities.JsonSerializer();
-                    var arguments = serializer.Deserialize<Dictionary<string, object>>(args);
-                    foreach ( var kv in arguments )
-                    {
-                        if(kv.Value is JsonElement element)
-                        {
-                            arguments[kv.Key] = Utilities.JsonSerializer.GetObject(element);
-                        }
-                    }
+                    Dictionary<string, object> arguments = serializer.Deserialize(args);
+
                     var context = new ExecutionContext(arguments);
                     var output = await tool.ExecuteAsync(function.ToString(), context);
 

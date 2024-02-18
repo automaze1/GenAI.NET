@@ -3,17 +3,19 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.32126.317
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenerativeAI", "GenerativeAI\GenerativeAI.csproj", "{BC19718C-9636-4BBE-8965-90F70DFD17B2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GenerativeAI", "GenerativeAI\GenerativeAI.csproj", "{BC19718C-9636-4BBE-8965-90F70DFD17B2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenAIFramework.Test", "GenAIFramework.Test\GenAIFramework.Test.csproj", "{A8CED45C-86FD-45C9-86BF-57D67B61ABE2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GenAIFramework.Test", "GenAIFramework.Test\GenAIFramework.Test.csproj", "{A8CED45C-86FD-45C9-86BF-57D67B61ABE2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FunctionTools", "..\examples\FunctionTools\FunctionTools.csproj", "{0CC8839A-69FA-4B2D-A01F-5E2A8D29D4EB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FunctionTools", "..\examples\FunctionTools\FunctionTools.csproj", "{0CC8839A-69FA-4B2D-A01F-5E2A8D29D4EB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleChatApplication", "..\examples\ConsoleChatApplication\ConsoleChatApplication.csproj", "{9342C016-55E6-44FB-9A34-65C0667E42D4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleChatApplication", "..\examples\ConsoleChatApplication\ConsoleChatApplication.csproj", "{9342C016-55E6-44FB-9A34-65C0667E42D4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenerativeAI.UX", "GenerativeAI.UX\GenerativeAI.UX.csproj", "{DE764CED-96F0-47DF-8901-18560888A0CF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GenerativeAI.UX", "GenerativeAI.UX\GenerativeAI.UX.csproj", "{DE764CED-96F0-47DF-8901-18560888A0CF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenerativeAI.Tools", "GenerativeAI.Tools\GenerativeAI.Tools.csproj", "{67F97E97-6DA9-4F9E-905A-4B252A683322}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GenerativeAI.Tools", "GenerativeAI.Tools\GenerativeAI.Tools.csproj", "{67F97E97-6DA9-4F9E-905A-4B252A683322}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenAIApp", "..\examples\GenAIApp\GenAIApp.csproj", "{DE741412-5333-47DD-B2BC-9FDF66CFCB5B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -44,6 +46,10 @@ Global
 		{67F97E97-6DA9-4F9E-905A-4B252A683322}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{67F97E97-6DA9-4F9E-905A-4B252A683322}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{67F97E97-6DA9-4F9E-905A-4B252A683322}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DE741412-5333-47DD-B2BC-9FDF66CFCB5B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE741412-5333-47DD-B2BC-9FDF66CFCB5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE741412-5333-47DD-B2BC-9FDF66CFCB5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE741412-5333-47DD-B2BC-9FDF66CFCB5B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

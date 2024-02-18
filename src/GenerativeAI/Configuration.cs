@@ -116,6 +116,15 @@ namespace Automation.GenerativeAI
                 return !string.IsNullOrEmpty(GPTDeployment) && !string.IsNullOrEmpty(ApiVersion);
             }
         }
+
+        public static OpenAIConfig Load(string jsonfile)
+        {
+            if(!File.Exists(jsonfile)) return new OpenAIConfig();
+
+            JsonSerializer serializer = new JsonSerializer();
+            var jsontxt = File.ReadAllText(jsonfile);
+            return serializer.Deserialize<OpenAIConfig>(jsontxt);
+        }
     }
 
     /// <summary>
