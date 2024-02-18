@@ -29,4 +29,18 @@
       <Name>GenerativeAI</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <None Update="Data\CreditRiskAssessmentReport.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\Northwind_Health_Plus_Benefits_Details.pdf.vdb">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\OpenAIConfig.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\SamplePO.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>

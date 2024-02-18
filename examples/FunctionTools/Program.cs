@@ -1,8 +1,6 @@
 ﻿using Automation.GenerativeAI;
-using Automation.GenerativeAI.Agents;
 using Automation.GenerativeAI.Chat;
 using Automation.GenerativeAI.Interfaces;
-using Automation.GenerativeAI.LLM;
 using Automation.GenerativeAI.Tools;
 using Automation.GenerativeAI.Utilities;
 using System;
@@ -10,68 +8,152 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Security.Policy;
 using System.Threading.Tasks;
 
 namespace FunctionTools
 {
     internal class Program
     {
-        internal static string GetDLLPath()
+        static string GetDLLPath()
         {
             var asm = Assembly.GetExecutingAssembly();
-            var codebase = asm.CodeBase;
-            UriBuilder uri = new UriBuilder(codebase);
+            var location = asm.Location;
+            UriBuilder uri = new UriBuilder(location);
             string path = Uri.UnescapeDataString(uri.Path);
-
             return path;
+        }
+
+        static string GetFullPath(string filename)
+        {
+            var asm = Assembly.GetExecutingAssembly();
+            var location = asm.Location;
+            UriBuilder uri = new UriBuilder(location);
+            string path = Uri.UnescapeDataString(uri.Path);
+            var exedir = Path.GetDirectoryName(path);
+            return Path.Combine(exedir, "Data", filename);
         }
 
         static async Task Main(string[] args)
         {
-            //await DemoBasicConversationUsingLanguageModel();
+            InitializeApplication();
 
-            //await DemoConversationWithOpenAIModel();
+            Console.Write("Function to execute:");
+            var function = Console.ReadLine();
 
-            //await DemoFunctionCalling();
+            switch (function)
+            {
+                case "DemoBasicConversationUsingAzureLanguageModel":
+                    await DemoBasicConversationUsingAzureLanguageModel();
+                    break;
+                case "DemoBasicConversationUsingLanguageModel":
+                    await DemoBasicConversationUsingLanguageModel();
+                    break;
+                case "DemoConversationWithOpenAIModel":
+                    await DemoConversationWithOpenAIModel();
+                    break;
+                case "DemoFunctionCalling":
+                    await DemoFunctionCalling();
+                    break;
+                case "DemoPromptAndQueryTool":
+                    await DemoPromptAndQueryTool();
+                    break;
+                case "SynchronousPromptAndQueryTool(":
+                    await Task.Run(SynchronousPromptAndQueryTool);
+                    break;
+                case "DemoPipeline":
+                    await DemoPipeline();
+                    break;
+                case "SynchronousPipeline":
+                    await Task.Run(SynchronousPipeline);
+                    break;
+                case "DemoMapReduce":
+                    await DemoMapReduce();
+                    break;
+                case "SynchronousMapReduce":
+                    await Task.Run(SynchronousMapReduce);
+                    break;
+                case "DemoSearchTool":
+                    await DemoSearchTool();
+                    break;
+                case "SynchronousBingSearch":
+                    await Task.Run(SynchronousBingSearch);
+                    break;
+                case "CreateFunctionDemo":
+                    await Task.Run(CreateFunctionDemo);
+                    break;
+                case "SimpleChat":
+                    await SimpleChat();
+                    break;
+                case "LatestNews":
+                    await LatestNews();
+                    break;
+                case "BrowsePage":
+                    await BrowsePage(@"https://twitter.com/search?q=Chandrayan");
+                    break;
+                case "ExtractData":
+                    await ExtractData();
+                    break;
+                case "SynchronousExtractData":
+                    await Task.Run(SynchronousExtractData);
+                    break;
+                case "WikiSearch":
+                    await WikiSearch(); 
+                    break;
+                case "ReadEmailsWithAgent":
+                    await Task.Run(ReadEmailsWithAgent);
+                    break;
+                case "CreditRiskAssessment":
+                    await Task.Run(CreditRiskAssessment);
+                    break;
+                default:
+                    Test();
+                    break;
+            }
+        }
 
-            //await DemoPromptAndQueryTool();
+        private static void InitializeApplication()
+        {
+            var configFile = GetFullPath("OpenAIConfig.json");
 
-            //await Task.Run(() => SynchronousPromptAndQueryTool());
+            if (!File.Exists(configFile)) throw new FileNotFoundException($"OpenAI conig json file is not available at {configFile}");
 
-            //await DemoPipeline();
+            var json = File.ReadAllText(configFile);
+            var config = FunctionTool.Deserialize<Dictionary<string, string>>(json);
+            var logfile = GetFullPath("GenerativeAI.log");
+            Application.InitializeAzureOpenAI(config["EndPointUrl"], config["GPTDeployment"], config["EmbeddingDeployment"], config["ApiVersion"], config["ApiKey"], config["Model"], logfile);
+        }
 
-            //await Task.Run(() => SynchronousPipeline());
+        private static ILanguageModel GetLLM()
+        {
+            //Create GenAI service
+            var svc = Application.GetAIService();
 
-            //await DemoMapReduce();
+            //Create OpenAI Language model
+            var configFile = GetFullPath("OpenAIConfig.json");
 
-            //await Task.Run(() => SynchronousMapReduce());
+            if (!File.Exists(configFile)) throw new FileNotFoundException($"OpenAI conig json file is not available at {configFile}");
 
-            //await DemoSearchTool();
+            var json = File.ReadAllText(configFile);
+            var config = FunctionTool.Deserialize<Dictionary<string, string>>(json);
+            return svc.CreateAzureOpenAIModel(config["Model"], config["EndPointUrl"], config["GPTDeployment"], config["EmbeddingDeployment"], config["ApiVersion"], config["ApiKey"]);
+        }
 
-            //await Task.Run(() => SynchronousBingSearch());
+        static async Task DemoBasicConversationUsingAzureLanguageModel()
+        {
+            var llm = GetLLM();
 
-            //await Task.Run(() => CreateFunctionDemo()); 
+            //Create Chat Message with a specific role
+            var message = new ChatMessage(Role.user, "Tell me a joke!");
 
-            //await SimpleChat();
-            //await LatestNews();
-
-            //await BrowsePage(@"https://twitter.com/search?q=Chandrayan");
-
-            //await ExtractData();
-
-            //await Task.Run(() => SynchronousExtractData());
-
-            //WikiSearch("Chandrayaan-3");
-
-            await WikiSearch();
+            //Get a Response from the language model using a list of chat messages.
+            var response = await llm.GetResponseAsync(Enumerable.Repeat(message, 1), 0.8);
+            //response.Response provides the response message
+            Console.WriteLine(response.Response);
         }
 
         static async Task DemoBasicConversationUsingLanguageModel()
         {
-            //Create OpenAI Language model
-            var apikey = ""; //Pass your API key, or set your api key to OPENAI_API_KEY environment variable
-            var llm = new OpenAILanguageModel("gpt-3.5-turbo-0613", apikey);
+            var llm = GetLLM();
 
             //Create Chat Message with a specific role
             var message = new ChatMessage(Role.user, "Hi, there!! I am Ram");
@@ -87,10 +169,8 @@ namespace FunctionTools
             //Create GenAI service
             var service = Application.GetAIService();
 
-            var apikey = ""; //Pass your API key, or set your api key to OPENAI_API_KEY environment variable
-
             //Create Language Model
-            var llm = service.CreateOpenAIModel("gpt-3.5-turbo-0613", apikey);
+            var llm = GetLLM();
 
             //Create Conversation
             var chat = service.CreateConversation("Test", llm);
@@ -123,8 +203,7 @@ namespace FunctionTools
             var function = new FunctionDescriptor(name, description, parameters);
             
             //Create OpenAI Language model
-            var apikey = ""; //Pass your API key, or set your api key to OPENAI_API_KEY environment variable
-            var llm = new OpenAILanguageModel("gpt-3.5-turbo-0613", apikey);
+            var llm = GetLLM();
 
             //Create user message
             var message = new ChatMessage(Role.user, "What is the weather like in Boston?");
@@ -177,8 +256,7 @@ namespace FunctionTools
             Console.WriteLine($"{msg.role}: {msg.content}");
 
             //Create OpenAI Language model
-            var apikey = ""; //Pass your API key, or set your api key to OPENAI_API_KEY environment variable
-            var llm = new OpenAILanguageModel("gpt-3.5-turbo-0613", apikey);
+            var llm = GetLLM();
 
             //Create a QueryTool to process this template with the language model
             var tool = QueryTool.WithPromptTemplate(prompt)
@@ -221,8 +299,7 @@ namespace FunctionTools
         static async Task DemoPipeline()
         {
             //Create OpenAI Language model
-            var apikey = ""; //Pass your API key, or set your api key to OPENAI_API_KEY environment variable
-            var llm = new OpenAILanguageModel("gpt-3.5-turbo-0613", apikey);
+            var llm = GetLLM();
 
             //Define a couple of template strings
             var template1 = "Provide me an engaging title for a blog on topic '{{$topic}}' for '{{$audience}}'.";
@@ -370,7 +447,7 @@ namespace FunctionTools
 
         static async Task ExtractData()
         {
-            var path = @"<<YOUR DOCUMENT PATH>>";
+            var path = GetFullPath("SamplePO.txt");
             var txt = TextExtractorTool.ExtractText(path);
 
             var parameters = new Dictionary<string, string>() 
@@ -401,7 +478,7 @@ namespace FunctionTools
 
         static void SynchronousExtractData()
         {
-            var path = @"<<YOUR DOCUMENT PATH>>";
+            var path = GetFullPath("SamplePO.txt");
 
             //Create text extractor tool
             var status = Application.CreateTextExtractorTool("ExtractText", "Extracts text");
@@ -431,7 +508,7 @@ namespace FunctionTools
             status = Application.CreateToolsPipeline("DataPipeline", "Data extraction pipeline", tools);
             Console.WriteLine($"DataPipeline Tool Creation Status: {status}");
 
-            var dict = new Dictionary<string, string>() { { "source", path } };
+            var dict = new Dictionary<string, string>() { { "input", path } };
             var ctx = FunctionTool.ToJsonString(dict);
             var results = Application.ExecuteTool("DataPipeline", ctx);
 
@@ -465,25 +542,18 @@ namespace FunctionTools
             //Create GenAI service
             var service = Application.GetAIService();
 
-            var apikey = ""; //Pass your API key, or set your api key to OPENAI_API_KEY environment variable
-
             //Create Language Model
-            var llm = service.CreateOpenAIModel("gpt-3.5-turbo-0613", apikey);
+            var llm = GetLLM();
+            var bingApiKey = ""; //Provide your own API key.
 
             //Create Conversation
             var chat = service.CreateConversation("Test", llm);
-
-            var dllpath = GetDLLPath();
-            var foldername = Path.GetDirectoryName(dllpath);
-
-            var logfile = Path.Combine(foldername, "sample.log");
-            Application.SetLogFilePath(logfile);
 
             //Create function tool from DLL and class name
             var toolset = new DLLFunctionTools(@"GenerativeAI.Tools.dll", "");
 
             var extractor = toolset.GetTool("GetTextContentFromWebpage");
-            var bing = SearchTool.ForBingSearch(string.Empty).WithMaxResultCount(3);
+            var bing = SearchTool.ForBingSearch(bingApiKey).WithMaxResultCount(3);
 
             //var tools = new ToolsCollection(new[] { extractor, bing });
             var tools = new ToolsCollection(bing);
@@ -515,18 +585,13 @@ namespace FunctionTools
             //Create GenAI service
             var service = Application.GetAIService();
 
-            var apikey = ""; //Pass your API key, or set your api key to OPENAI_API_KEY environment variable
-
             //Create Language Model
-            var llm = service.CreateOpenAIModel("gpt-3.5-turbo-0613", apikey);
+            var llm = GetLLM();
             
             //Create Conversation
             var chat = service.CreateConversation("Test", llm);
 
             var dllpath = GetDLLPath();
-
-            var logfile = Path.Combine(Path.GetDirectoryName(dllpath), "sample.log");
-            Application.SetLogFilePath(logfile);
 
             //Create function tool from DLL and class name
             var tool = new DLLFunctionTools(dllpath, "FunctionTools.Utilities");
@@ -546,30 +611,8 @@ namespace FunctionTools
             Console.WriteLine($"{response.role}: {response.content}");
         }
 
-        static void WikiSearch(string query)
-        {
-            var prompt = PromptTool.WithTemplate("https://wikipedia.org/w/index.php?search={{$query}}");
-            var httpget = HttpTool.WithClient();
-
-            //Create function tool from DLL and class name
-            var toolset = new DLLFunctionTools(@"GenerativeAI.Tools.dll", "Automation.GenerativeAI.Tools.WebContentExtractor");
-
-            var extractor = toolset.GetTool("GetTextFromHtml");
-
-            var pipeline = Pipeline.WithTools(new[] {prompt, httpget, extractor});
-
-            var context = new ExecutionContext();
-            context["query"] = query;
-            //context["method"] = "GET";
-            var text = pipeline.ExecuteAsync(context).GetAwaiter().GetResult();
-
-            Console.Write(text);
-            Console.ReadLine();
-        }
-
         static async Task WikiSearch()
         {
-            Logger.SetLogFile("Sample.log");
             var prompt = PromptTool.WithTemplate("https://wikipedia.org/w/index.php?search={{$query}}");
             var httpget = HttpTool.WithClient();
 
@@ -579,24 +622,111 @@ namespace FunctionTools
             var extractor = toolset.GetTool("GetTextFromHtml");
 
             var responses = new Dictionary<string, string>() { { "Text", "Here is my text summary" } };
-            var llm = new MockLanguageModel("Test", responses);
-
-            var mapperPrompt = "Provide me one para summary of the following article. \n {{$article}}";
+            //var llm = new MockLanguageModel("Test", responses);
+            var llm = GetLLM();
+            var mapperPrompt = "Provide me one para summary of the following article taken from wikipage in a coherent story format. Ignore references and links in the article.\n {{$article}}";
             var reducerPrompt = "Summarize the following texts in a clear and concise short article not more than 250 words.\n\n {{$article}}";
-            var summarizer = TextSummarizer.WithMapReduce().WithLanguageModel(llm);
+            var summarizer = TextSummarizer.WithMapReduce(mapperPrompt, reducerPrompt).WithLanguageModel(llm);
 
             var wikisearch = Pipeline.WithTools(new[] { prompt, httpget, extractor, summarizer })
                                    .WithName("WikiSearch")
                                    .WithDescription("Searches wikipedia to provide relevant information on a topic or personality!");
 
+            Console.Write("What do you want to search?: ");
+            var query = Console.ReadLine();
             var ctx = new ExecutionContext();
-            ctx["query"] = "Parmanu: The Story of Pokhran";
+            ctx["query"] = query;
 
             var result = await wikisearch.ExecuteAsync(ctx);
             Console.WriteLine(result);
             Console.ReadLine();
         }
 
-        
+        static void ReadEmailsWithAgent()
+        {
+            var tools = Application.AddToolsFromDLL("GenerativeAI.Tools.dll");
+            
+            var agent = "Personal Assistant";
+
+            var status = Application.CreateAgent(agent, tools, 3, string.Empty);
+            
+            var objective = @"Provide me a summary of my top 5 emails";
+
+            var response = Application.PlanAndExecuteWithAgent(agent, objective, 0.8);
+
+            Console.WriteLine(response);
+            Console.ReadLine();
+        }
+
+        static void CreditRiskAssessment()
+        {
+            var start = DateTime.Now;
+            var path = GetFullPath("CreditRiskAssessmentReport.txt");
+            
+            //Create text extractor tool
+            var status = Application.CreateTextExtractorTool("ExtractText", "Extracts text");
+
+            Console.WriteLine($"ExtractText Tool Creation Status: {status}");
+
+            var parameters = new Dictionary<string, string>()
+            {
+                { "Company", "Full name or inquiry name of the company in this report?" },
+                { "Credit Rating", "What is the credit risk assessment rating for the company listed in the report." },
+                { "Company Age", "Age of business in number of years" },
+                { "Company Business", "Line of Business based on company profile" },
+                { "Regional Risk", "Based on country or region insight how is the risk category defined? Classify it in Low, Medium or High?" },
+                { "CEO", "Who is the cheif executive of the company in this report?" },
+                { "Company Address", "What is the company address in this report?" },
+                { "Methodology", "What is the RISK PREDICTOR SCORE METHODOLOGY in this report? How is it developed?" },
+                { "Score Driver", "What is the key drivers in the risk predictor score in this report?" },
+            };
+
+            var prametersJson = FunctionTool.ToJsonString(parameters);
+
+            status = Application.CreateDataExtractorTool("DataExtractor", "Extracts Data", prametersJson);
+            Console.WriteLine($"DataExtractor Tool Creation Status: {status}");
+
+            var tools = new List<string>() { "ExtractText", "DataExtractor" };
+            status = Application.CreateToolsPipeline("DataPipeline", "Data extraction pipeline", tools);
+            Console.WriteLine($"DataPipeline Tool Creation Status: {status}");
+
+            var dict = new Dictionary<string, string>() { { "input", path } };
+            var ctx = FunctionTool.ToJsonString(dict);
+
+            var results = Application.ExecuteTool("DataPipeline", ctx);
+
+            var data = FunctionTool.Deserialize<Dictionary<string, string>>(results);
+
+            foreach (var pair in data)
+            {
+                Console.WriteLine($"{pair.Key}: {pair.Value}");
+            }
+            var ellapsedTime = DateTime.Now.Subtract(start).TotalSeconds;
+            Console.WriteLine($"Ellpased Time: {ellapsedTime} secs");
+            Console.ReadLine();
+        }
+
+        static void Test()
+        {
+            var template = @"Please answer the following question based on the context below:
+
+Question: 
+{{$Input.query}}
+
+Context:
+{{$context}}";
+
+            var vdbpath = GetFullPath("Northwind_Health_Plus_Benefits_Details.pdf.vdb");
+            var searchTool = SearchTool.ForSemanticSearchFromDatabase(vdbpath).WithMaxResultCount(5);
+            var queryTool = QueryTool.WithPromptTemplate(template).WithLanguageModel(GetLLM());
+            var pipelineTool = Pipeline.WithTools(new IFunctionTool[] { searchTool, queryTool });
+            var context = new ExecutionContext();
+            context["query"] = "What is the maternity benefit covered in the plan?";
+
+            var json = pipelineTool.ExecuteAsync(context).GetAwaiter().GetResult();
+
+            Console.WriteLine(json);
+            Console.ReadLine();
+        }
     }
 }
