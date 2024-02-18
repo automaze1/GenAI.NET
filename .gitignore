@@ -13,3 +13,5 @@ examples/*/obj
 docs/automation.generativeai.stores.data.md
 docs/automation.generativeai.stores.embeddingresult.md
 build/GenerativeAI/
+examples/FunctionTools/Data/OpenAIConfig.json
+examples/GenAIApp/OpenAIConfig.json
