@@ -1,8 +1,7 @@
 ﻿using Automation.GenerativeAI;
 using Automation.GenerativeAI.Interfaces;
-using Automation.GenerativeAI.LLM;
+using Automation.GenerativeAI.Tools;
 using Automation.GenerativeAI.UX.Services;
-using MathNet.Numerics.LinearAlgebra.Factorization;
 using System.IO;
 using System.Reflection;
 using ChatMessage = Automation.GenerativeAI.UX.Models.ChatMessage;
@@ -27,6 +26,8 @@ present in the context, respond that you don't have the knowledge about the give
         {
             var exepath = Assembly.GetExecutingAssembly().Location;
             DocumentsPath = Path.Combine(Path.GetDirectoryName(exepath), "Documents");
+            var logFilePath = Path.Combine(DocumentsPath, "GenAIChatApp.log");
+
             var responses = new Dictionary<string, string>()
             {
                 { "Hi, there!", "Hi There! I am your Automation Agent, How may I assist you?"},
@@ -35,17 +36,10 @@ present in the context, respond that you don't have the knowledge about the give
             };
             //languageModel = new MockLanguageModel("Test", responses);
             generativeAIService = Application.GetAIService();
+            Application.SetLogFilePath(logFilePath);
 
-            //Create OpenAI Language model
-            var azureEndpoint = "https://aai-ps-openai-use2.openai.azure.com/";
-            var deployment = "aai_ps_gpt35_turbo";
-            var embedding = "aai_ps_text_embedding_ada";
-            var apiversion = "2023-08-01-preview";
-            var apikey = "8413622cec58474fbec6d9c0f6c08ef0"; 
-            languageModel = generativeAIService.CreateAzureOpenAIModel("gpt-35-turbo", azureEndpoint, deployment, embedding, apiversion, apikey);
+            languageModel = CreateLanguageModel();
 
-            var logFilePath = Path.Combine(DocumentsPath, "GenAIChatApp.log");
-            Application.InitializeAzureOpenAI(azureEndpoint, deployment, embedding, apiversion, apikey, "gpt-35-turbo", logFilePath);
             CreateVectorDatabases();
         }
 
@@ -120,6 +114,31 @@ present in the context, respond that you don't have the knowledge about the give
         public Task UpadateChatHistoryAsync(string id, IEnumerable<ChatMessage> messages)
         {
             throw new NotImplementedException();
+        }
+
+        static string GetFullPath(string filename)
+        {
+            var asm = Assembly.GetExecutingAssembly();
+            var location = asm.Location;
+            UriBuilder uri = new UriBuilder(location);
+            string path = Uri.UnescapeDataString(uri.Path);
+            var exedir = Path.GetDirectoryName(path);
+            return Path.Combine(exedir, filename);
+        }
+
+        private static ILanguageModel CreateLanguageModel()
+        {
+            //Create GenAI service
+            var svc = Application.GetAIService();
+
+            //Create OpenAI Language model
+            var configFile = GetFullPath("OpenAIConfig.json");
+
+            if (!File.Exists(configFile)) throw new FileNotFoundException($"OpenAI conig json file is not available at {configFile}");
+
+            var json = File.ReadAllText(configFile);
+            var config = FunctionTool.Deserialize<Dictionary<string, string>>(json);
+            return svc.CreateAzureOpenAIModel(config["Model"], config["EndPointUrl"], config["GPTDeployment"], config["EmbeddingDeployment"], config["ApiVersion"], config["ApiKey"]);
         }
     }
 }
