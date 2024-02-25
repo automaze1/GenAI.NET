@@ -17,6 +17,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="Factobi.Data">
+      <HintPath>..\..\..\Factobi\extern\Factobi\Factobi.Data.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="OpenAIConfig.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

@@ -18,9 +18,10 @@ namespace GenAIApp
 
         string systemMessage = @"You are an intelligent assistant that analyzes the given query carefully and 
 if the given query is related to a port then it makes a function call to get relevant context on the query and
-provides the final answer based on the context received. While making the function call to get relevant context
-you must provide the complete query for better context. Always answer based on the context, if answer is not 
-present in the context, respond that you don't have the knowledge about the given query.";
+provides the final answer based on the context received. All the charges mentioned in the context are in USD.
+While making the function call to get relevant context you must provide the complete query for better context. 
+Always answer based on the context, if answer is not present in the context, respond that you don't have the 
+knowledge about the given query.";
 
         public ChatService()
         {

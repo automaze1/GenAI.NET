@@ -11,14 +11,16 @@ namespace Automation.GenerativeAI.Chat
     internal class Conversation : IConversation
     {
         private readonly string contextid;
-        private readonly List<ChatMessage> messages = new List<ChatMessage>();
+        //private readonly List<ChatMessage> messages = new List<ChatMessage>();
         private readonly ILanguageModel languageModel;
         private IVectorStore store = null;
         private IFunctionToolSet tool = null;
         private PromptTemplate contextPrompt = null;
         private ChatMessage systemMessage = null;
+        private MemoryStore memory = new MemoryStore();
+        private ChatMessage userMessage = null;
 
-        public IEnumerable<ChatMessage> GetChatHistory() { return messages; }
+        //public IEnumerable<ChatMessage> GetChatHistory() { return memory.ChatHistory(string.Empty); }
 
         public Conversation(string id, ILanguageModel llm)
         {
@@ -46,7 +48,11 @@ QUESTION:
             }
             else
             {
-                messages.Add(chatmessage);
+                memory.AddMessage(chatmessage);
+                if(chatmessage.role == "user")
+                {
+                    userMessage = chatmessage;
+                }
             }
         }
 
@@ -58,7 +64,11 @@ QUESTION:
             }
             else
             {
-                messages.Add(message);
+                memory.AddMessage(message);
+                if (message.role == "user")
+                {
+                    userMessage = message;
+                }
             }
         }
 
@@ -109,9 +119,9 @@ QUESTION:
 
             //If vector store context is available then perform semantic search to
             //identify relevant content as context
-            if (store != null && messages.Count > 0)
+            if (store != null && userMessage != null)
             {
-                var msg = messages.Last();
+                var msg = userMessage;
                 Logger.WriteLog(LogLevel.Info, LogOps.Command, $"Query String: {msg.content}");
                 var match = store.Search(TextObject.Create("Context", msg.content), 4).ToArray();
                 string context = string.Empty;
@@ -136,12 +146,14 @@ QUESTION:
                 if (string.IsNullOrEmpty(context))
                 {
                     //Didn't find the right context, so just include message history as context.
-                    msgs.AddRange(messages);
+                    var history = memory.ChatHistory(userMessage.content);
+                    msgs.AddRange(history);
                 }
             }
             else
             {
-                msgs.AddRange(messages);
+                var history = memory.ChatHistory(userMessage.content);
+                msgs.AddRange(history);
             }
 
             var functions = Enumerable.Empty<FunctionDescriptor>();
@@ -176,7 +188,7 @@ QUESTION:
 
                     if (string.IsNullOrEmpty(output))
                     {
-                        messages.Add(fmsg);
+                        AppendMessage(fmsg);
                         return fmsg;
                     }
 
@@ -185,9 +197,10 @@ QUESTION:
             }
             if (response.Type == ResponseType.Done)
             {
-                messages.Add(msgs.Last());
+                userMessage = null;
+                AppendMessage(msgs.Last());
             }
-            return messages.Last();
+            return msgs.Last();
         }
 
         internal static ChatMessage GetFunctionCallSystemMessage()
@@ -202,7 +215,10 @@ QUESTION:
         public void AddToolSet(IFunctionToolSet toolSet)
         {
             //update system message to extract data using toolset
-            systemMessage = GetFunctionCallSystemMessage();
+            if(systemMessage == null)
+            {
+                systemMessage = GetFunctionCallSystemMessage();
+            }
 
             this.tool = toolSet;
         }
