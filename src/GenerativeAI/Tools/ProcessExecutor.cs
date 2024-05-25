@@ -25,8 +25,26 @@ namespace Automation.GenerativeAI.Tools
                 Description = "Full set of arguments to execute the process."
             };
 
+            if (string.IsNullOrEmpty(workingDir))
+            {
+                workingDir = Path.GetTempPath();
+            }
+
             executablePath = exePath;
             workingDirectory = workingDir;
+        }
+
+        /// <summary>
+        /// Creates a process executor tool to execute a given process with appropriate arguments.
+        /// </summary>
+        /// <param name="exepath">Full path of the executable.</param>
+        /// <param name="workingdirectory">Working directory for the process, by default it uses 
+        /// user's temp folder as working directory.</param>
+        /// <param name="name">Name of the tool</param>
+        /// <param name="description">Description of the tool</param>
+        public ProcessExecutor(string exepath, string workingdirectory = "", string name = "ProcessExecutor", string description = "") : this(exepath, workingdirectory)
+        {
+            Name = name; Description = description;
         }
 
         /// <summary>

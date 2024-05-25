@@ -39,6 +39,9 @@
     <None Update="Data\OpenAIConfig.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Data\Tool.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Data\SamplePO.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

@@ -1,0 +1,27 @@
+{
+  "module": "GenerativeAI.dll",
+  "classname": "Automation.GenerativeAI.Tools.Pipeline",
+  "method": "",
+  "parameters": {
+    "tools": [
+      {
+        "module": "GenerativeAI.dll",
+        "classname": "Automation.GenerativeAI.Tools.QueryTool",
+        "method": "",
+        "parameters": {
+          "promptTemplate": "Provide me an engaging title for a blog on topic '{{$topic}}' for '{{$audience}}'.",
+          "name":  "Tool1"
+        }
+      },
+      {
+        "module": "GenerativeAI.dll",
+        "classname": "Automation.GenerativeAI.Tools.QueryTool",
+        "method": "",
+        "parameters": {
+          "promptTemplate": "Give me outline of a blog with title: {{$title}}.",
+          "name": "Tool2"
+        }
+      }
+    ]
+  }
+}

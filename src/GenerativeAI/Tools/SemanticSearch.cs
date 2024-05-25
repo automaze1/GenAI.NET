@@ -23,6 +23,29 @@ namespace Automation.GenerativeAI.Tools
             database = store;
         }
 
+        /// <summary>
+        /// Creates a search tool for semantic search using a given vector database. The input parameter
+        /// name to execute this tool is 'query'.
+        /// </summary>
+        /// <param name="dbpath">Full path of the vector database. The vector database can be created using 
+        /// CreateVectorDatabaseForSemanticSearch method.</param>
+        /// <param name="maxResultsCount">Count of maximum results to be expected by this search tool.</param>
+        /// <param name="name">Name of the tool.</param>
+        /// <param name="description">Description of the tool.</param>
+        public SemanticSearch(string dbpath, int maxResultsCount = 5, string name = "SemanticSearch", string description = "") : this()
+        {
+            dbFactory = () =>
+            {
+                var service = Application.GetAIService();
+
+                return service.DeserializeVectorStore(dbpath);
+            };
+
+            count = maxResultsCount;
+            Name = name;
+            if (!string.IsNullOrEmpty(description)) { Description = description; }
+        }
+
         public SemanticSearch(Func<IVectorStore> factory, int chunkSize = 1000, int chunkOverlap = 100) : this()
         {
             this.chunkSize = chunkSize;

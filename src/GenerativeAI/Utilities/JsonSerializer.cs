@@ -45,13 +45,15 @@ namespace Automation.GenerativeAI.Utilities
                 case JsonValueKind.Undefined:
                     break;
                 case JsonValueKind.Object:
-                    break;
+                    return GetDictionary(element);
                 case JsonValueKind.Array:
                     return GetArray(element);
                 case JsonValueKind.String:
                     return element.GetString();
                 case JsonValueKind.Number:
-                    return element.GetDouble();
+                    var value = element.GetDouble();
+                    if ((value % 1) == 0) return element.GetInt32();
+                    else return value;
                 case JsonValueKind.True:
                     return true;
                 case JsonValueKind.False:
@@ -62,6 +64,25 @@ namespace Automation.GenerativeAI.Utilities
                     break;
             }
             return element;
+        }
+
+        public static Dictionary<string, object> GetDictionary(JsonElement element)
+        {
+            // Create an empty dictionary to store the key-value pairs
+            Dictionary<string, object> dictionary = [];
+
+            // Loop through the properties of the element
+            foreach (JsonProperty property in element.EnumerateObject())
+            {
+                // Get the property name and value
+                string key = property.Name;
+                object value = GetObject(property.Value);
+
+                // Add the key-value pair to the dictionary
+                dictionary.Add(key, value);
+            }
+
+            return dictionary;
         }
 
         private static object[] GetArray(JsonElement element)

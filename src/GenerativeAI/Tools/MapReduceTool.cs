@@ -32,6 +32,26 @@ namespace Automation.GenerativeAI.Tools
         }
 
         /// <summary>
+        /// Creates MapReduce tool which can take a mapper tool to map the input collection to
+        /// an intermediate data using mapper tool and then reduce the intermediate data to the final
+        /// output using reducer tool. The mapper runs in parallel, hence mapper tool needs to ensure
+        /// thread safety. The input parameter to execute this tool is the same as the input parameters
+        /// of the mapper tool, however, each parameter is of array type in this case.
+        /// </summary>
+        /// <param name="mapper">The tool to map the input collection to an intermediate data.</param>
+        /// <param name="reducer">The tool to process the intermediate data to reduce to the final output.</param>
+        /// <param name="name">Name of the tool.</param>
+        /// <param name="description">Description of the tool.</param>
+        public MapReduceTool(IFunctionTool mapper, IFunctionTool reducer, string name = "MapReduce", string description = "") : this(mapper, reducer) 
+        {
+            Name = name;
+            if(!string.IsNullOrEmpty(description))
+            {
+                Description = description;
+            }
+        }
+
+        /// <summary>
         /// Creates an instance of MapReduceTool using mapper and reducer tool.
         /// </summary>
         /// <param name="mapper">A tool to map the input collection to an intermediate data.</param>

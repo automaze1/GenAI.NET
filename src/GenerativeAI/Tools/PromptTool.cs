@@ -24,6 +24,23 @@ namespace Automation.GenerativeAI.Tools
         protected PromptTool() { Name = "PromptTool"; Description = "Renders a prompt template to a string using input variable values."; }
 
         /// <summary>
+        /// Creates a prompt tool based on a given prompt template. The input parameters to
+        /// execute this tool is same as the variables defined in the input prompt template.
+        /// </summary>
+        /// <param name="promptTemplate">Template string with input variables. The variable input
+        /// must be represented by {{$input}} text in the template, where
+        /// input is the variable value in the template.</param>
+        /// <param name="name">Name of the tool.</param>
+        /// <param name="description">Description of the tool.</param>
+        public PromptTool(string promptTemplate,
+            string name = "PromptTool",
+            string description = "")
+        {
+            Name = name; Description = description;
+            prompt = new PromptTemplate(promptTemplate);
+        }
+
+        /// <summary>
         /// Creates a new instance of PrompTool with template string
         /// </summary>
         /// <param name="prompttemplate">Prompt template string.</param>

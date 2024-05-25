@@ -29,6 +29,19 @@ namespace Automation.GenerativeAI.Tools
         }
 
         /// <summary>
+        /// Creates a text extractor tool that extracts text from different files. Currently
+        /// txt, csv and pdf files are supported. The input parameter to execute this tool
+        /// is 'input'.
+        /// </summary>
+        /// <param name="name">Name of the tool.</param>
+        /// <param name="description">Description of the tool.</param>
+        public TextExtractorTool(string name = "TextExtractor", string description = "") : this()
+        {
+            Name = name;
+            if (!string.IsNullOrEmpty(description)) { Description = description; }
+        }
+
+        /// <summary>
         /// Creates a TextExtractorTool
         /// </summary>
         /// <returns>TextExtractorTool</returns>

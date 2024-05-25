@@ -29,6 +29,22 @@ namespace Automation.GenerativeAI.Tools
         }
 
         /// <summary>
+        /// Creates a combine tool to combine an array of string using newline. The input parameter
+        /// name to execute this tool is 'input'
+        /// </summary>
+        /// <param name="skiptext">The text to skip from combining if it is part of the input collection.</param>
+        /// <param name="name">Name of the tool.</param>
+        /// <param name="description">Description of the tool.</param>
+        public CombineTool(string skiptext = "",
+            string name = "Combine",
+            string description = "") : this()
+        {
+            Name = name;
+            if (!string.IsNullOrEmpty(description)) { this.Description = description; }
+            this.skiptext = skiptext;
+        }
+
+        /// <summary>
         /// Creates a new instance of the Combine Tool
         /// </summary>
         /// <returns>CombineTool</returns>

@@ -36,7 +36,7 @@ namespace FunctionTools
         static async Task Main(string[] args)
         {
             InitializeApplication();
-
+            
             Console.Write("Function to execute:");
             var function = Console.ReadLine();
 
@@ -105,10 +105,38 @@ namespace FunctionTools
                 case "CreditRiskAssessment":
                     await Task.Run(CreditRiskAssessment);
                     break;
+                case "CreatePipelineFromJsonAsync":
+                    await CreatePipelineFromJsonAsync();
+                    break;
                 default:
                     Test();
                     break;
             }
+        }
+
+        private static async Task CreatePipelineFromJsonAsync()
+        {
+            var jsonfile = GetFullPath("Tool.json");
+            var json = File.ReadAllText(jsonfile);
+
+            var tool = FunctionTool.CreateTool(json);
+
+            //Define execution context with the parameter values
+            var context = new ExecutionContext(new Dictionary<string, object>()
+            {
+                {"topic", "Generative Ai" },
+                {"audience", "Children"}
+            });
+
+            var outline = await tool.ExecuteAsync(context);
+
+            object title;
+            context.TryGetResult("Tool1", out title);
+            Console.WriteLine($"TITLE: {title}");
+            Console.WriteLine();
+            Console.WriteLine(outline);
+
+            Console.WriteLine(tool.Name);
         }
 
         private static void InitializeApplication()

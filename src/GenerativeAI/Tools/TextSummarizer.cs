@@ -13,6 +13,22 @@ namespace Automation.GenerativeAI.Tools
         private ILanguageModel languageModel;
         private double temperature = 0.8;
 
+        private TextSummarizer() { }
+
+        /// <summary>
+        /// Creates a text summarizer tool with map reduce strategy. The input parameter to
+        /// execute this tool is input.
+        /// </summary>
+        /// <param name="mapperPrompt">Prompt to summarize each chunk from a large text.</param>
+        /// <param name="reducerPrompt">Prompt to combine all the summaries to create final summary.</param>
+        /// <param name="name">Name of the tool</param>
+        /// <param name="description">Description of the tool</param>
+        public TextSummarizer(string mapperPrompt, string reducerPrompt, string name = "TextSummarizer", string description = "")
+        {
+            Name = name; Description = description;
+            CreateMapperReducerTools(mapperPrompt, reducerPrompt);
+        }
+
         /// <summary>
         /// The input text parameter description for the TextSummarizer tool.
         /// </summary>

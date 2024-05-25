@@ -16,6 +16,28 @@ namespace Automation.GenerativeAI.Tools
         private Pipeline() { }
 
         /// <summary>
+        /// Creates a pipeline with a list of tools. A pipeline executes tools sequentially, where
+        /// output of previous tools can be input of the next tool in the sequence. The input
+        /// parameter to execute this tool is same as the input parameter of the first tool in
+        /// the pipeline.
+        /// </summary>
+        /// <param name="tools">List of tools to be added to the pipeline.</param>
+        /// <param name="name">Name of the tool.</param>
+        /// <param name="description">Description of the tool.</param>
+        public Pipeline(IEnumerable<IFunctionTool> tools, 
+            string name = "Pipeline",
+            string description = "")
+        {
+            Name = name;
+            Description = description;
+            foreach (var tool in tools)
+            {
+                if (!TryAddTool(tool)) continue;
+            }
+        }
+
+
+        /// <summary>
         /// A method to create Pipeline with a list of tools. If any of the tool in the list can't be added 
         /// successfully, then that tool will be skipped from the pipeline.
         /// </summary>

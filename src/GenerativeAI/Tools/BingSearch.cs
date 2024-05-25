@@ -24,6 +24,17 @@ namespace Automation.GenerativeAI.Tools
             httpTool = HttpTool.WithClient().WithDefaultRequestHeaders(headers);
         }
 
+        public BingSearch(int maxResultsCount = 5, string apikey = "", string name = "BingSearch", string description = "") : this(apikey)
+        {
+            count = maxResultsCount;
+            Name = name;
+            Description = description;
+            if (string.IsNullOrEmpty(description))
+            {
+                Description = "Performs web search using Bing and gets the URL and snippet of related articles on the web.";
+            }
+        }
+
         /// <summary>
         /// Creates BingSearch tool with parameters
         /// </summary>

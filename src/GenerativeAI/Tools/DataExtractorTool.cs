@@ -17,6 +17,21 @@ namespace Automation.GenerativeAI.Tools
         private readonly int ChunkSize = 1200;
         private readonly int ChunkOverlap = 200;
 
+        private DataExtractorTool() { }
+
+        /// <summary>
+        /// Creates a tool that can extract data from an unstructured text using language model. The input
+        /// parameter name to execute this tool is 'input'.
+        /// </summary>
+        /// <param name="parameters">The key value pairs for name and description for parameters to be extracted.</param>
+        /// <param name="name">Name of the tool, it must be unique.</param>
+        /// <param name="description">Description of the tool.</param>
+        public DataExtractorTool(Dictionary<string, string> parameters, string name = "DataExtractorTool", string description = "")
+        {
+            Name = name; Description = description;
+            WithParameters(parameters);
+        }
+
         /// <summary>
         /// Creates basic DataExtractorTool
         /// </summary>
@@ -83,7 +98,8 @@ namespace Automation.GenerativeAI.Tools
             {
                 var param = new ParameterDescriptor() { 
                     Name = item.Key, 
-                    Description = item.Value
+                    Description = item.Value,
+                    Required = false
                 };
 
                 this.parameters.Add(param);

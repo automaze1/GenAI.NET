@@ -5,9 +5,18 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using JsonSerializer = Automation.GenerativeAI.Utilities.JsonSerializer;
 
 namespace Automation.GenerativeAI.Tools
 {
+    internal class ToolDefinition
+    {
+        public string? module { get; set; }
+        public string? classname { get; set; }
+        public string? method { get; set; }
+        public Dictionary<string, object> parameters { get; set; } = [];
+    }
+
     /// <summary>
     /// The base implementation of IFunctionTool interface as FunctionTool
     /// </summary>
@@ -290,6 +299,147 @@ namespace Automation.GenerativeAI.Tools
                 (str.StartsWith("[") && str.EndsWith("]"))) return true;
 
             return false;
+        }
+
+        /// <summary>
+        /// Creates tool with the help of given json string.
+        /// </summary>
+        /// <param name="json">JSON string defining the Function Tool.</param>
+        /// <returns>IFunctionTool or null</returns>
+        public static IFunctionTool CreateTool(string json)
+        {
+            var serializer = new JsonSerializer();
+            var data = serializer.Deserialize(json);
+
+            var def = TryGetToolDefinition(data);
+
+            return CreateTool(def);
+        }
+
+        private static IFunctionTool CreateTool(ToolDefinition toolDefinition)
+        {
+            if (toolDefinition.module.ToLower() == "generativeai.dll" && string.IsNullOrEmpty(toolDefinition.method))
+            {
+                var type = Type.GetType(toolDefinition.classname, false, true);
+                if (type == null) return null;
+
+                var constructors = type.GetConstructors();
+                var values = new List<object>();
+                foreach (var constructor in constructors)
+                {
+                    var parameters = constructor.GetParameters();
+                    foreach (var parameter in parameters)
+                    {
+                        if (toolDefinition.parameters.ContainsKey(parameter.Name))
+                        {
+                            var pValue = toolDefinition.parameters[parameter.Name];
+                            if (pValue is string str) { pValue = str; }
+                            else if (pValue is IDictionary dictionary)
+                            {
+                                pValue = InstanciateToolsInDictionary(dictionary);
+                            }
+                            else if(pValue is IEnumerable enumerable)
+                            {
+                                pValue = InstanciateToolsInList(enumerable);
+                            }
+                            values.Add(pValue);
+                        }
+                        else if (parameter.HasDefaultValue)
+                        {
+                            values.Add(parameter.DefaultValue);
+                        }
+                        else
+                        {
+                            values.Clear();
+                            break; //we don't have all parameters required for this construtor.
+                        }
+                    }
+
+                    if (values.Count == parameters.Length)
+                    {
+                        return constructor.Invoke(values.ToArray()) as IFunctionTool;
+                    }
+                }
+            } 
+            
+            return null;
+        }
+
+        private static object InstanciateToolsInDictionary(IDictionary dictionary)
+        {
+            foreach(DictionaryEntry entry in dictionary)
+            {
+                var value = entry.Value;
+                if(value is ToolDefinition toolDefinition)
+                {
+                    var tool = CreateTool(toolDefinition);
+                    if(tool != null)
+                    {
+                        dictionary[entry.Key] = tool;
+                    }
+                }
+            }
+
+            return dictionary;
+        }
+
+        private static object InstanciateToolsInList(IEnumerable list)
+        {
+            List<object> results = new List<object>();
+
+            bool allTools = true;
+            foreach (object entry in list)
+            {
+                if (entry is ToolDefinition toolDefinition)
+                {
+                    var tool = CreateTool(toolDefinition);
+                    if (tool != null)
+                    {
+                        results.Add(tool);
+                    }
+                }
+                else
+                {
+                    results.Add(entry);
+                    allTools = false;
+                }
+            }
+            if(allTools) return results.Cast<IFunctionTool>();
+            return results;
+        }
+
+        private static ToolDefinition TryGetToolDefinition(Dictionary<string, object> data)
+        {
+            try
+            {
+                var def = new ToolDefinition();
+                def.module = (string)data["module"];
+                def.method = (string)data["method"];
+                def.classname = (string)data["classname"];
+                def.parameters = data["parameters"] as Dictionary<string, object>;
+                foreach (var item in def.parameters)
+                {
+                    if (item.Value is Dictionary<string, object> obj)
+                    {
+                        var newdef = TryGetToolDefinition(obj);
+                        if(newdef != null) { def.parameters[item.Key] = newdef; }
+                    }
+                    else if(item.Value is object[] array)
+                    {
+                        if(array.All(x => x is Dictionary<string, object>))
+                        {
+                            var tools = array.Cast<Dictionary<string, object>>().Select(TryGetToolDefinition).ToArray();
+                            def.parameters[item.Key] = tools;
+                        }
+                    }
+                }
+
+                return def;
+            }
+            catch (Exception)
+            {
+                return null;
+            }            
         }
     }
 }

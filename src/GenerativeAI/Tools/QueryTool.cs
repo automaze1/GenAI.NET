@@ -23,6 +23,25 @@ namespace Automation.GenerativeAI.Tools
         }
 
         /// <summary>
+        /// Creates a query tool to get response of the query using generative AI model. 
+        /// The input parameters to execute this tool is same as the variables defined 
+        /// in the input prompt template.
+        /// </summary>
+        /// <param name="promptTemplate">Template string with input variables. The variable input
+        /// must be represented by {{$input}} text in the template, where
+        /// input is the variable value in the template.</param>
+        /// <param name="temperature"></param>
+        /// <param name="name">Name of the tool.</param>
+        /// <param name="description">Description of the tool.</param>
+        public QueryTool(string promptTemplate,
+            double temperature = 0.8,
+            string name = "Query",
+            string description = "") : base(promptTemplate, name, description)
+        {
+            this.temperature = temperature;
+        }
+
+        /// <summary>
         /// Creates QueryTool object with a prompt template object.
         /// </summary>
         /// <param name="prompt">Prompt template for the tool</param>
