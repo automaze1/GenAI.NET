@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using JsonSerializer = Automation.GenerativeAI.Utilities.JsonSerializer;
 
@@ -11,9 +12,9 @@ namespace Automation.GenerativeAI.Tools
 {
     internal class ToolDefinition
     {
-        public string? module { get; set; }
-        public string? classname { get; set; }
-        public string? method { get; set; }
+        public required string module { get; set; }
+        public string classname { get; set; } = string.Empty;
+        public string method { get; set; } = string.Empty;
         public Dictionary<string, object> parameters { get; set; } = [];
     }
 
@@ -318,11 +319,15 @@ namespace Automation.GenerativeAI.Tools
 
         private static IFunctionTool CreateTool(ToolDefinition toolDefinition)
         {
-            if (toolDefinition.module.ToLower() == "generativeai.dll" && string.IsNullOrEmpty(toolDefinition.method))
-            {
-                var type = Type.GetType(toolDefinition.classname, false, true);
-                if (type == null) return null;
+            Assembly assembly = Assembly.LoadFrom(toolDefinition.module);
+            Type type = null;
+            if (assembly == null) return null;
+            
+            type = assembly.GetType(toolDefinition.classname, false, true);
+            if(type == null) return null;
 
+            if(type.IsAssignableTo(typeof(IFunctionTool))) //We have a type of IFuctionTool, so just find the constructor
+            {
                 var constructors = type.GetConstructors();
                 var values = new List<object>();
                 foreach (var constructor in constructors)
@@ -360,8 +365,13 @@ namespace Automation.GenerativeAI.Tools
                         return constructor.Invoke(values.ToArray()) as IFunctionTool;
                     }
                 }
-            } 
-            
+            }
+            else
+            {
+                var toolset = new DLLFunctionTools(toolDefinition.module, toolDefinition.classname);
+                return toolset.GetTool(toolDefinition.method);
+            }
+
             return null;
         }
 
@@ -412,8 +422,7 @@ namespace Automation.GenerativeAI.Tools
         {
             try
             {
-                var def = new ToolDefinition();
-                def.module = (string)data["module"];
+                var def = new ToolDefinition() { module = (string)data["module"] };
                 def.method = (string)data["method"];
                 def.classname = (string)data["classname"];
                 def.parameters = data["parameters"] as Dictionary<string, object>;

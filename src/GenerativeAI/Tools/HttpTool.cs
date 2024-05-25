@@ -33,6 +33,20 @@ namespace Automation.GenerativeAI.Tools
         }
 
         /// <summary>
+        /// Creates HttpTool with given name and description
+        /// </summary>
+        /// <param name="name">Name of the tool.</param>
+        /// <param name="description">Description of the tool.</param>
+        public HttpTool(string name = "ExecuteHttpRequest", string description = "") : this(null, true)
+        {
+            Name = name;
+            if (!string.IsNullOrEmpty(description))
+            {
+                Description = description;
+            }
+        }
+
+        /// <summary>
         /// Creates the HttpTool with given client
         /// </summary>
         /// <param name="httpClient">HttpClient to send requests</param>

@@ -108,6 +108,9 @@ namespace FunctionTools
                 case "CreatePipelineFromJsonAsync":
                     await CreatePipelineFromJsonAsync();
                     break;
+                case "WikiSearchPipelineWithJsonAsync":
+                    await WikiSearchPipelineWithJsonAsync();
+                    break;
                 default:
                     Test();
                     break;
@@ -659,6 +662,23 @@ namespace FunctionTools
             var wikisearch = Pipeline.WithTools(new[] { prompt, httpget, extractor, summarizer })
                                    .WithName("WikiSearch")
                                    .WithDescription("Searches wikipedia to provide relevant information on a topic or personality!");
+
+            Console.Write("What do you want to search?: ");
+            var query = Console.ReadLine();
+            var ctx = new ExecutionContext();
+            ctx["query"] = query;
+
+            var result = await wikisearch.ExecuteAsync(ctx);
+            Console.WriteLine(result);
+            Console.ReadLine();
+        }
+
+        static async Task WikiSearchPipelineWithJsonAsync()
+        {
+            var jsonfile = GetFullPath("WikiSearchPipeline.json");
+            var json = File.ReadAllText(jsonfile);
+
+            var wikisearch = FunctionTool.CreateTool(json);
 
             Console.Write("What do you want to search?: ");
             var query = Console.ReadLine();

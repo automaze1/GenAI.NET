@@ -1,0 +1,41 @@
+{
+  "module": "GenerativeAI.dll",
+  "classname": "Automation.GenerativeAI.Tools.Pipeline",
+  "method": "",
+  "parameters": {
+    "name": "WikiSearchTool",
+    "description": "Searches wikipedia to provide relevant information on a topic or personality!",
+    "tools": [
+      {
+        "module": "GenerativeAI.dll",
+        "classname": "Automation.GenerativeAI.Tools.PromptTool",
+        "method": "",
+        "parameters": {
+          "promptTemplate": "https://wikipedia.org/w/index.php?search={{$query}}"
+        }
+      },
+      {
+        "module": "GenerativeAI.dll",
+        "classname": "Automation.GenerativeAI.Tools.HttpTool",
+        "method": "",
+        "parameters": {
+        }
+      },
+      {
+        "module": "GenerativeAI.Tools.dll",
+        "classname": "Automation.GenerativeAI.Tools.WebContentExtractor",
+        "method": "GetTextFromHtml",
+        "parameters": {}
+      },
+      {
+        "module": "GenerativeAI.dll",
+        "classname": "Automation.GenerativeAI.Tools.TextSummarizer",
+        "method": "",
+        "parameters": {
+          "mapperPrompt": "Provide me one para summary of the following article taken from wikipage in a coherent story format. Ignore references and links in the article.\n {{$article}}",
+          "reducerPrompt": "Summarize the following texts in a clear and concise short article not more than 250 words.\n\n {{$article}}"
+        }
+      }
+    ]
+  }
+}
