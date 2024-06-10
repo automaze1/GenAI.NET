@@ -1,0 +1,11 @@
+{
+    "module": "GenerativeAI.dll",
+    "class": "Automation.GenerativeAI.Tools.QueryTool",
+    "method": "",
+    "inputs": [
+        {
+            "name": "promptTemplate",
+            "value": "You are a helpful AI Agent who answers user's questions accurately. You must always use the context if given to find the answer to the given question. If the context doesn't have any content, then use your knowledge to get the correct answer. DO NOT MAKE UP YOUR ANSWER. Please answer the following.\n\nQUESTION:\n{{$query}}\n\nCONTEXT:\n{{$context}}"
+        }
+    ]
+}

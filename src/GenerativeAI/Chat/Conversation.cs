@@ -35,6 +35,7 @@ QUESTION:
 ";
 
             contextPrompt = new PromptTemplate(template);
+            memory.Configure(10000, new VectorStore(languageModel.VectorTransformer));
         }
 
         public string Id => contextid;
@@ -215,7 +216,7 @@ QUESTION:
         public void AddToolSet(IFunctionToolSet toolSet)
         {
             //update system message to extract data using toolset
-            if(systemMessage == null)
+            if (systemMessage == null)
             {
                 systemMessage = GetFunctionCallSystemMessage();
             }

@@ -18,7 +18,7 @@
 
   <ItemGroup>
     <Reference Include="Factobi.Data">
-      <HintPath>..\..\..\Factobi\extern\Factobi\Factobi.Data.dll</HintPath>
+      <HintPath>..\..\src\lib\Factobi.Data.dll</HintPath>
     </Reference>
   </ItemGroup>
 

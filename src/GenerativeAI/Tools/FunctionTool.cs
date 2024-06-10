@@ -3,6 +3,7 @@ using Automation.GenerativeAI.Utilities;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -317,9 +318,24 @@ namespace Automation.GenerativeAI.Tools
             return CreateTool(def);
         }
 
+        static string GetFullPath(string filename)
+        {
+            var asm = Assembly.GetExecutingAssembly();
+            var location = asm.Location;
+            UriBuilder uri = new UriBuilder(location);
+            string path = Uri.UnescapeDataString(uri.Path);
+            var exedir = Path.GetDirectoryName(path);
+            return Path.Combine(exedir, filename);
+        }
+
         private static IFunctionTool CreateTool(ToolDefinition toolDefinition)
         {
-            Assembly assembly = Assembly.LoadFrom(toolDefinition.module);
+            var fullPath = Path.GetFullPath(toolDefinition.module);
+            if(!File.Exists(fullPath)) 
+            {
+                fullPath = GetFullPath(toolDefinition.module);
+            }
+            Assembly assembly = Assembly.LoadFrom(fullPath);
             Type type = null;
             if (assembly == null) return null;
             
@@ -368,7 +384,7 @@ namespace Automation.GenerativeAI.Tools
             }
             else
             {
-                var toolset = new DLLFunctionTools(toolDefinition.module, toolDefinition.classname);
+                var toolset = new DLLFunctionTools(fullPath, toolDefinition.classname);
                 return toolset.GetTool(toolDefinition.method);
             }
 

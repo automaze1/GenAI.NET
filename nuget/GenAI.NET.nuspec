@@ -8,6 +8,7 @@
         <projectUrl>https://github.com/automaze1/GenAI.NET</projectUrl>
 		<icon>images\icon.png</icon>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<readme>docs\README.md</readme>
         <description>Assemblies required to create a generative AI application that can interact with a large language model. Contains the following files:
         1) GenerativeAI.dll
 		2) GenerativeAI.UX.dll
@@ -30,5 +31,6 @@
 		<file src="..\bin\AnyCPU\Release\GenerativeAI.Tools.dll" target="lib\net472" />
 		<file src="..\bin\AnyCPU\Release\GenerativeAI.Tools.xml" target="lib\net472" />
 		<file src=".\icon.png" target="images\" />
+		<file src="..\README.md" target="docs\" />
     </files>
 </package>

@@ -43,13 +43,17 @@ namespace GenAIApp
         public static string GetPortPDAData(string portName)
         {
             var chatService = ServiceContainer.Resolve<ChatService>();
+            portName = portName.ToLower().Replace("port", "").Trim();
             var excelpath = Path.Combine(chatService.DocumentsPath, "Indian Ports PDA.xlsx");
             var db = Database.ConnectExcelDatabase(excelpath);
 
             var ports = db.GetTables();
             var port = ports.First(p => string.Equals(p, portName, StringComparison.OrdinalIgnoreCase));
             var table = db.GetData(port);
-            return table.GetDataAsString(-1, false, true);
+            var text = table.GetDataAsString(-1, false, true);
+            if (text.Length > 10000) return text.Substring(0, 10000);
+
+            return text;
         }
 
         /// <summary>

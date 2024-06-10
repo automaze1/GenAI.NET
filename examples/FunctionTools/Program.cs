@@ -1,4 +1,5 @@
 ﻿using Automation.GenerativeAI;
+using Automation.GenerativeAI.Agents;
 using Automation.GenerativeAI.Chat;
 using Automation.GenerativeAI.Interfaces;
 using Automation.GenerativeAI.Tools;
@@ -110,6 +111,9 @@ namespace FunctionTools
                     break;
                 case "WikiSearchPipelineWithJsonAsync":
                     await WikiSearchPipelineWithJsonAsync();
+                    break;
+                case "WikiSearchAgentAsync":
+                    await WikiSearchAgentAsync();
                     break;
                 default:
                     Test();
@@ -687,6 +691,22 @@ namespace FunctionTools
 
             var result = await wikisearch.ExecuteAsync(ctx);
             Console.WriteLine(result);
+            Console.ReadLine();
+        }
+
+        static async Task WikiSearchAgentAsync()
+        {
+            var jsonfile = GetFullPath("WikiSearchPipeline.json");
+            var json = File.ReadAllText(jsonfile);
+
+            var wikisearch = FunctionTool.CreateTool(json);
+
+            Console.Write("Hi, I am your wiki search agent. Provide me an objective: ");
+            var objective = Console.ReadLine();
+            var agent = Agent.Create("WikiSearch").WithTools(new[] { wikisearch }).WithMaxAllowedSteps(5);
+
+            var step = await agent.ExecuteAsync(objective);
+            Console.WriteLine(FunctionTool.ToJsonString(step));
             Console.ReadLine();
         }
 
